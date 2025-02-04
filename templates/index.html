@@ -12,17 +12,25 @@
 
         socket.on('response', function (data) {
             console.log('Server says: ' + data);
+            document.getElementById('received').innerHTML += data +"<br>";      //adds message to list
         });
 
         function sendMessage() {
             var message = document.getElementById('message').value;
-            socket.emit('message', message);
+            var userID = 7000 //dsfijfndskif
+            socket.emit('message', {message: message, userID: userID});         //sends the dictonary
         }
+
+
+
     </script>
 </head>
 <body>
     <h1>WebSocket Example</h1>
     <input type="text" id="message" placeholder="Type a message">
     <button onclick="sendMessage()">Send</button>
+
+    <div id="received" placeholder="Message will appear here"></div>            <!-- list to show messages-->
+
 </body>
 </html>
