@@ -6,44 +6,18 @@ import asyncio
 import math
 import time
 from contextlib import asynccontextmanager
-from limits import *
 
+from ratelimits import *
 import authentication
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
 
 #rate limiting link access default settings
-#access_limiter = Limiter(get_remote_address,
-#                         app=app,
-#                         default_limits=['200 per day', '20 per hour'],
-#                         storage_uri="memory://")
-# [TODO] add message limiting later (need to figure out order for message limiter var creation?)
-#bucket-based rate limiter (For SocketIO functions)
-class SocketIO_Limiter:
-    def __init__(self, rate, capacity) -> None:
-        self.capacity = capacity
-        self.tokens = capacity
-        self.rate = rate
-        self.last_check = time.time()
-
-    #func for limiting, takes 1 token
-    def allow_request(self, amount=1):
-        current_time = time.time()
-        passed_time = current_time - self.last_check
-        self.last_check = current_time #updates time checked
-
-        self.tokens += passed_time * self.rate
-        if self.tokens > self.capacity:
-            self.tokens = self.capacity
-
-        if self.tokens >= amount:
-            self.tokens -= amount
-            print("All good!")
-            return True
-        else:
-            print("Rate limiting enabled!")
-            return False
+access_limiter = Limiter(get_remote_address,
+                         app=app,
+                         default_limits=['200 per day', '20 per hour'],
+                         storage_uri="memory://")
 
 rate_limiter = SocketIO_Limiter(1/20, 20)
 #socket setup
@@ -80,27 +54,29 @@ def authenticate(login_info):
 @socketio.on('message')
 #@message_limiter.limit("10 per minute")
 def handle_message(data):
-    sessionID = request.sid
-    confirm = 0
-    person = ''
+    if(rate_limiter.allow_request()):
+        sessionID = request.sid
+        confirm = 0
+        person = ''
 
-    #really scuffed but sends to other user
-    for username, client in clients.items():
-        if client[1] != sessionID:
-            confirm = client[1]
-        if client[1] == sessionID:
-            person = username
-    
+        #really scuffed but sends to other user
+        for username, client in clients.items():
+            if client[1] != sessionID:
+                confirm = client[1]
+            if client[1] == sessionID:
+                person = username
         
+            
 
-    message = data  
-    userID = person     
-    message1 = f"Message: '{message}'\nSent by User: {userID}" #formats message
+        message = data  
+        userID = person     
+        message1 = f"Message: '{message}'\nSent by User: {userID}" #formats message
 
         print(message1)
         socketio.emit('response', message1, to=confirm)      #sends back the message as a single string
     else:
-        socketio.emit('response', "Rate-limited! " + userID + " needs to slow down!")
+
+        socketio.emit('response', "Rate-limited! You need to slow down!", to=request.sid)
 
 if __name__ == '__main__':
   socketio.run(app, debug=True)
