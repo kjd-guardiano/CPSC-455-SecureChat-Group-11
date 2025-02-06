@@ -15,24 +15,51 @@
             document.getElementById('received').innerHTML += data +"<br>";      //adds message to list
         });
 
+        //recieves the success or failure of login attempt
+        socket.on('login1', function(data) {
+            if (data === 1) {
+                // If login is successful, show the response and sent message areas
+                document.getElementById('messageContainer').style.display = 'block';
+                document.getElementById('login_form').style.display = "none";
+            } else if (data === -1) {
+                
+                console.log("Login failed");
+            }
+        });
+
         function sendMessage() {
             var message = document.getElementById('message').value;
-            var userID = 7000 //dsfijfndskif
             document.getElementById('sent').innerHTML += message +"<br>";
-            socket.emit('message', {message: message, userID: userID});         //sends the dictonary
+            socket.emit('message', message);         //sends the dictonary
         }
 
+        //sends login info to server to verify
+        function login(){
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            socket.emit('authenticate',{username: username, password: password});
+        }
 
+      
 
     </script>
 </head>
 <body>
     <h1>WebSocket Example</h1>
-    <input type="text" id="message" placeholder="Type a message">
-    <button onclick="sendMessage()">Send</button>
-
     
-    <div id="received">RECEIVED MESSAGE: <br></div>            <!-- list to show messages-->
-    <div id="sent">SENT MESSAGE <br></div> 
+    
+    <div id="login_form">
+    <input type="text" id= "username" placeholder="Username"  required><br><br>
+    <input type="password" id="password" placeholder="Password" required><br><br>
+    <button type="button" onclick="login()">Login</button><br><br>
+    </div>
+
+    <div id="messageContainer" style="display:none;">
+        <input type="text" id="message" placeholder="Type a message"><br><br>
+        <button type="button" onclick="sendMessage()">Send</button><br><br>
+        
+        <div id="received">RECEIVED MESSAGE: <br></div> <!-- List to show received messages -->
+        <div id="sent">SENT MESSAGE <br></div> 
+    </div>
 </body>
 </html>
