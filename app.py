@@ -11,7 +11,7 @@ app.config['SECRET_KEY'] = 'dummy_secret_key'
 #rate limiting link access default settings
 access_limiter = Limiter(get_remote_address,
                          app=app,
-                         default_limits=['2000 per day', '2000 per hour'],
+                         default_limits=['200 per day', '20 per hour'],
                          storage_uri="memory://")
 # [TODO] add message limiting later (need to figure out order for message limiter var creation?)
 #message_limiter = Limiter(handle_message,  # type: ignore
@@ -54,18 +54,16 @@ def handle_message(data):
     sessionID = request.sid
     confirm = 0
     person = ''
-    for username, (is_logged_in, sid) in clients.items():
-        if sid != sessionID:
-            confirm = sid
-           
-    for username, (is_logged_in, sid) in clients.items():
-        if sid == sessionID:
+    for username, client in clients.items():
+        if client[1] != sessionID:
+            confirm = client[1]
+        if client[1] == sessionID:
             person = username
     print(clients)
         
 
-    message = data.get('message')    #sets message from dictionary
-    userID = person     #sets userid from dictionary
+    message = data  
+    userID = person     
     message1 = f"Message: '{message}'\nSent by User: {userID}" #formats message
 
     print(message1)

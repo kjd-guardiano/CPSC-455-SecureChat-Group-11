@@ -29,12 +29,11 @@
 
         function sendMessage() {
             var message = document.getElementById('message').value;
-            var userID = 7000 //dsfijfndskif
             document.getElementById('sent').innerHTML += message +"<br>";
-            socket.emit('message', {message: message, userID: userID});         //sends the dictonary
+            socket.emit('message', message);         //sends the dictonary
         }
 
-        //sends login info to server
+        //sends login info to server to verify
         function login(){
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
