@@ -12,10 +12,10 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
 
 #rate limiting link access default settings
-access_limiter = Limiter(get_remote_address,
-                         app=app,
-                         default_limits=['200 per day', '20 per hour'],
-                         storage_uri="memory://")
+#access_limiter = Limiter(get_remote_address,
+#                         app=app,
+#                         default_limits=['200 per day', '20 per hour'],
+#                         storage_uri="memory://")
 # [TODO] add message limiting later (need to figure out order for message limiter var creation?)
 #bucket-based rate limiter (For SocketIO functions)
 class SocketIO_Limiter:
@@ -81,7 +81,7 @@ def handle_message(data):
         print(message1)
         socketio.emit('response', message1, to=confirm)      #sends back the message as a single string
     else:
-        socketio.emit('response', "Rate-limited! User needs to slow down!", to=confirm)
+        socketio.emit('response', "Rate-limited! Sender needs to slow down!")
 
 if __name__ == '__main__':
   socketio.run(app, debug=True)
