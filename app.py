@@ -45,7 +45,7 @@ def authenticate(login_info):
         login_sucess = 1
         print(username,' successfully logged in!')
         clients[username] = (True,request.sid)
-    socketio.emit('login1',login_sucess)
+    socketio.emit('login1',login_sucess,to=request.sid)
 
 
 @socketio.on('message')
@@ -54,14 +54,14 @@ def handle_message(data):
     sessionID = request.sid
     confirm = 0
     person = ''
-    for i in clients:
-        if i[2] != sessionID:
-            confirm = i[2]
-    
-    for i in clients:
-        if i[2] == sessionID:
-            person = i[0]
-            
+    for username, (is_logged_in, sid) in clients.items():
+        if sid != sessionID:
+            confirm = sid
+           
+    for username, (is_logged_in, sid) in clients.items():
+        if sid == sessionID:
+            person = username
+    print(clients)
         
 
     message = data.get('message')    #sets message from dictionary

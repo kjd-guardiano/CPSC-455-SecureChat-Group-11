@@ -15,6 +15,7 @@
             document.getElementById('received').innerHTML += data +"<br>";      //adds message to list
         });
 
+        //recieves the success or failure of login attempt
         socket.on('login1', function(data) {
             if (data === 1) {
                 // If login is successful, show the response and sent message areas
@@ -33,6 +34,7 @@
             socket.emit('message', {message: message, userID: userID});         //sends the dictonary
         }
 
+        //sends login info to server
         function login(){
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
