@@ -18,7 +18,6 @@
         function sendMessage() {
             var message = document.getElementById('message').value;
             var userID = 7000 //dsfijfndskif
-            document.getElementById('sent').innerHTML += message +"<br>";
             socket.emit('message', {message: message, userID: userID});         //sends the dictonary
         }
 
@@ -31,8 +30,7 @@
     <input type="text" id="message" placeholder="Type a message">
     <button onclick="sendMessage()">Send</button>
 
-    
-    <div id="received">RECEIVED MESSAGE: <br></div>            <!-- list to show messages-->
-    <div id="sent">SENT MESSAGE <br></div> 
+    <div id="received" placeholder="Message will appear here"></div>            <!-- list to show messages-->
+
 </body>
 </html>
