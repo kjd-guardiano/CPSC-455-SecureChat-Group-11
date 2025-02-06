@@ -35,12 +35,13 @@ def index():
 def handle_connect():
     print('Client sid:',request.sid, ' connected!')
 
-
+#authenticates the user given username/password
 @socketio.on('authenticate')
 def authenticate(login_info):
     username = login_info.get('username')
     password = login_info.get('password')
     login_sucess = -1
+    #calls the actual fucntion that authenticates 
     if authentication.pword_check(username,password):
         login_sucess = 1
         print(username,' successfully logged in!')
@@ -54,12 +55,14 @@ def handle_message(data):
     sessionID = request.sid
     confirm = 0
     person = ''
+
+    #really scuffed but sends to other user
     for username, client in clients.items():
         if client[1] != sessionID:
             confirm = client[1]
         if client[1] == sessionID:
             person = username
-    print(clients)
+    
         
 
     message = data  

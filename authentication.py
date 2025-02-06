@@ -2,10 +2,6 @@ import bcrypt
 import pwinput
 import os
 
-
-
-
-
 def pword_check(username_,password_):
     if not os.path.exists("db.txt"):
         with open("db.txt","w") as file:
