@@ -24,6 +24,7 @@ access_limiter = Limiter(get_remote_address,
 socketio = SocketIO(app)
 billy_limit = SocketIO_Limiter(1/20, 20)
 sally_limit = SocketIO_Limiter(1/20, 20)
+
 clients = {
             'Billy':(False,0), #Username: (whether or not they are logged in, sid)
             'Sally':(False,0)
@@ -58,8 +59,10 @@ def handle_message(data):
     username = data.get('user')
     if username == 'Billy':
         limiter = billy_limit
+        online_test = 'Sally'
     else:
         limiter = sally_limit
+        online_test = 'Billy'
         
     if(limiter.allow_request()):
         for username_, client in clients.items():
@@ -70,7 +73,13 @@ def handle_message(data):
         message1 = f"Message: '{message}'\nSent by User: {username}" #formats message
 
         print(message1)
-        socketio.emit('response', message1, to=sessionID)      #sends back the message as a single string
+
+        if clients[online_test][0]== False:      #if other user is not online then message doesnt get sent
+            error_msg = f"{online_test} is not online"
+            socketio.emit('response', error_msg, to=request.sid)
+
+        else:
+            socketio.emit('response', message1, to=sessionID)      #sends back the message as a single string
     else:
 
         socketio.emit('response', "Rate-limited! You need to slow down!", to=request.sid)
