@@ -78,5 +78,14 @@ def handle_message(data):
 
         socketio.emit('response', "Rate-limited! You need to slow down!", to=request.sid)
 
+
+@socketio.on('disconnect')
+def disconnect():
+    sid = request.sid
+    for i in clients:
+        if i[1] == sid:
+            i[1] = 0
+            i[0] = False
+
 if __name__ == '__main__':
   socketio.run(app, debug=True)
