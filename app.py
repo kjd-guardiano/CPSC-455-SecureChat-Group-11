@@ -19,10 +19,11 @@ access_limiter = Limiter(get_remote_address,
                          default_limits=['200 per day', '20 per hour'],
                          storage_uri="memory://")
 
-rate_limiter = SocketIO_Limiter(1/20, 20)
+
 #socket setup
 socketio = SocketIO(app)
-
+billy_limit = SocketIO_Limiter(1/20, 20)
+sally_limit = SocketIO_Limiter(1/20, 20)
 clients = {
             'Billy':(False,0), #Username: (whether or not they are logged in, sid)
             'Sally':(False,0)
@@ -54,26 +55,22 @@ def authenticate(login_info):
 @socketio.on('message')
 #@message_limiter.limit("10 per minute")
 def handle_message(data):
-    if(rate_limiter.allow_request()):
-        sessionID = request.sid
-        confirm = 0
-        person = ''
-
-        #really scuffed but sends to other user
-        for username, client in clients.items():
-            if client[1] != sessionID:
-                confirm = client[1]
-            if client[1] == sessionID:
-                person = username
+    username = data.get('user')
+    if username == 'Billy':
+        limiter = billy_limit
+    else:
+        limiter = sally_limit
         
-            
-
-        message = data  
-        userID = person     
-        message1 = f"Message: '{message}'\nSent by User: {userID}" #formats message
+    if(limiter.allow_request()):
+        for username_, client in clients.items():
+            if username_ != username:
+                sessionID = client[1]
+       
+        message = data.get('message')    #sets message from dictionary
+        message1 = f"Message: '{message}'\nSent by User: {username}" #formats message
 
         print(message1)
-        socketio.emit('response', message1, to=confirm)      #sends back the message as a single string
+        socketio.emit('response', message1, to=sessionID)      #sends back the message as a single string
     else:
 
         socketio.emit('response', "Rate-limited! You need to slow down!", to=request.sid)
