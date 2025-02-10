@@ -31,7 +31,8 @@
         function sendMessage() {
             var message = document.getElementById('message').value;
             document.getElementById('sent').innerHTML += message +"<br>";
-            socket.emit('message',{message: message, user: name});         //sends the dictonary
+            var receiver = document.getElementById('receiver').value;
+            socket.emit('message',{message: message, user: name, receiver: receiver});         //sends the dictonary
         }
 
         //sends login info to server to verify
@@ -56,6 +57,17 @@
     </div>
 
     <div id="messageContainer" style="display:none;">
+
+        <div class="tab-container">
+            <h2>Choose receiver of message</h2>
+            <select id="receiver">
+                <option value="">Select a name...</option>
+                <option value="Billy">Billy</option>
+                <option value="Sally">Sally</option>
+                <br><br>
+            </select>
+        </div>
+
         <input type="text" id="message" placeholder="Type a message"><br><br>
         <button type="button" onclick="sendMessage()">Send</button><br><br>
         
