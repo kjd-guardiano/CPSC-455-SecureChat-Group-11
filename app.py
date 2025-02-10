@@ -78,7 +78,7 @@ def handle_message(data):
 
 @socketio.on('disconnect')
 def disconnect():
-    pass
+    users.disconnect(request.sid)
 
 if __name__ == '__main__':
   cert = ('securechat.crt','seckey.key')

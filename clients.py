@@ -13,11 +13,6 @@ class client:
     def set_pid(self, pid):
         self.pid = pid
         self.online = True
-
-
-    def disconnect(self):
-        self.online = False
-
  
     #def get_conversations()
 
@@ -45,4 +40,12 @@ class clients:
 
     def check_status(self,name):
         return self.clients_dict[name].online
+
+    def disconnect(self, pid):
+        for user in self.clients_dict:
+            if self.clients_dict[user].pid == pid:
+                print(user, ' disconnected')
+                self.clients_dict[user].online = False
+                self.clients_dict[user].pid = 0
+
        
