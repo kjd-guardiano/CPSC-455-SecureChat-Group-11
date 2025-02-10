@@ -20,8 +20,12 @@ class client:
 
 class clients:
     def __init__(self):
-        self.clients_dict = {'Billy': client('Billy'),
-                        'Sally': client('Sally')}
+        self.clients_dict = {
+            
+                        'Billy': client('Billy'),
+                        'Sally': client('Sally'),
+                        'Joe': client('Joe'),
+                        'Jill': client('Jill'),}
 
 
     def set_status(self,name,pid):
