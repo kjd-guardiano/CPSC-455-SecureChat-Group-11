@@ -1,27 +1,18 @@
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO
-<<<<<<< HEAD
-=======
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import asyncio
 import math
 import time
 from contextlib import asynccontextmanager
-
-
 from ratelimits import *
 import authentication
 import clients
->>>>>>> testing
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
 
-<<<<<<< HEAD
-socketio = SocketIO(app)
-
-=======
 #rate limiting link access default settings
 access_limiter = Limiter(get_remote_address,
                          app=app,
@@ -30,20 +21,16 @@ access_limiter = Limiter(get_remote_address,
 
 
 #socket setup
-socketio = SocketIO(app)
+socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True)
 
 users = clients.clients()   #class that stores info on all clients
 
->>>>>>> testing
 @app.route('/') 
 def index():
     return render_template('index.html')
 
 @socketio.on('connect')
 def handle_connect():
-<<<<<<< HEAD
-  print('Client connected!')
-=======
     print('Client sid:',request.sid, ' connected!')
 
 #authenticates the user given username/password
@@ -59,18 +46,8 @@ def authenticate(login_info):
         users.set_status(username, request.sid)                      #using class now
     socketio.emit('login1',login_sucess,to=request.sid)
 
->>>>>>> testing
-
 @socketio.on('message')
 def handle_message(data):
-<<<<<<< HEAD
-  message = data.get('message')    #sets message from dictionary
-  userID = data.get('userID')       #sets userid from dictionary
-  message1 = f"Message: '{message}'\nSent by User: {userID}" #formats message
-
-  print(message1)
-  socketio.emit('response', message1)      #sends back the message as a single string
-=======
     username = data.get('user')
     receiver = data.get('receiver')
     
@@ -97,7 +74,6 @@ def handle_message(data):
 @socketio.on('disconnect')
 def disconnect():
     users.disconnect(request.sid)
->>>>>>> testing
 
 if __name__ == '__main__':
   cert = ('securechat.crt','seckey.key')
