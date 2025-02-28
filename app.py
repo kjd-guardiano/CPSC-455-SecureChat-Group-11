@@ -81,5 +81,5 @@ def disconnect():
     users.disconnect(request.sid)
 
 if __name__ == '__main__':
-  cert = ('securechat.crt','seckey.key')
+  cert = ('security/securechat.crt','security/seckey.key')
   socketio.run(app, debug=True, ssl_context=cert)

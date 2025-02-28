@@ -20,12 +20,14 @@ class client:
 
 class clients:
     def __init__(self):
-        self.clients_dict = {
-            
-                        'Billy': client('Billy'),
-                        'Sally': client('Sally'),
-                        'Joe': client('Joe'),
-                        'Jill': client('Jill'),}
+        self.clients_dict = {}
+
+        with open('db.txt', 'r') as file:
+            for line in file:
+                # Split the line into username and hash (we only care about the username)
+                username, _ = line.strip().split(' ', 1)
+                # Create a client instance for each username and store it in the dictionary
+                self.clients_dict[username] = client(username)
 
 
     def set_status(self,name,pid):
