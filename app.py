@@ -50,8 +50,7 @@ def authenticate(login_info):
         users.add_user(username)
         users.set_status(username, request.sid)   
                            #using class now
-    user_names = users.retrieve_user_list()                       
-    socketio.emit('send_user_list', user_names)
+    
     socketio.emit('signup',sign_up_sucess,to=request.sid)
 
 
@@ -67,6 +66,8 @@ def authenticate(login_info):
     if authentication.pword_check(username,password):
         login_sucess = 1
         print(username,' successfully logged in!')
+        user_names = users.retrieve_user_list()                       
+        socketio.emit('send_user_list', user_names)
         users.set_status(username, request.sid)                      #using class now
     socketio.emit('login1',login_sucess,to=request.sid)
 
