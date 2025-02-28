@@ -53,7 +53,10 @@ class clients:
             user_list.append(name)
         print(user_list)
         return user_list
-
+    
+    def add_user(self,name):
+        self.clients_dict[name] = client(name)
+    
     def disconnect(self, pid):
         for user in self.clients_dict:
             if self.clients_dict[user].pid == pid:

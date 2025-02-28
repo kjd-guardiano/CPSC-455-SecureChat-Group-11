@@ -35,17 +35,35 @@ def index():
 
 @socketio.on('connect')
 def handle_connect():
-    user_names = users.retrieve_user_list()
+    
     print('Client sid:',request.sid, ' connected!')
+    
+
+@socketio.on('sign_up')
+def authenticate(login_info):
+    username = login_info.get('username')
+    password = login_info.get('password')
+    sign_up_sucess = -1
+    if authentication.sign_up(username,password):
+        sign_up_sucess = 1
+        print(username,' successfully logged in!')
+        users.add_user(username)
+        users.set_status(username, request.sid)   
+                           #using class now
+    user_names = users.retrieve_user_list()                       
     socketio.emit('send_user_list', user_names)
+    socketio.emit('signup',sign_up_sucess,to=request.sid)
+
 
 #authenticates the user given username/password
 @socketio.on('authenticate')
 def authenticate(login_info):
     username = login_info.get('username')
     password = login_info.get('password')
+    print(username,password)
     login_sucess = -1
-    #calls the actual fucntion that authenticates 
+    
+    
     if authentication.pword_check(username,password):
         login_sucess = 1
         print(username,' successfully logged in!')

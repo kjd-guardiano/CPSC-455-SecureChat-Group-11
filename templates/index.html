@@ -53,8 +53,15 @@
             socket.emit('message', { message: message, user: name, receiver: receiver });         //sends the dictonary
         }
 
+
+        function sign_up() {
+            var username = document.getElementById('Sign_up_username').value;
+            var password = document.getElementById('Sign_up_password').value;
+            socket.emit('sign_up', { username: username, password: password });
+        }
         //sends login info to server to verify
         function login() {
+            console.log(username,password)
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
             socket.emit('authenticate', { username: username, password: password });
@@ -68,6 +75,12 @@
 <body>
     <h1>COOL CHAT</h1>
 
+
+    <div id="sign_up_form">
+        <input type="text" id="Sign_up_username" placeholder="username" required><br><br>
+        <input type="password" id="Sign_up_password" placeholder="password" required><br><br>
+        <button type="button" onclick="sign_up()">Sign Up</button><br><br>
+    </div>
 
     <div id="login_form">
         <input type="text" id="username" placeholder="Username" required><br><br>
