@@ -16,6 +16,23 @@
             document.getElementById('received').innerHTML += data + "<br>";      //adds message to list
         });
 
+        socket.on('send_user_list', function (data) {
+    var users = data;  // Extract the user list from the message
+    var receiverSelect = document.getElementById('receiver');
+    
+    // Remove all existing options
+    receiverSelect.options.length = 0;
+
+    // Add the default "Select a name..." option
+    receiverSelect.add(new Option('Select a name...', ''));
+
+    // Add new options based on the users array
+    users.forEach(function (user) {
+        receiverSelect.add(new Option(user, user));
+    });
+});
+
+
         //recieves the success or failure of login attempt
         socket.on('login1', function (data) {
             if (data === 1) {
@@ -67,11 +84,6 @@
                 Choose receiver of message
                 <select id="receiver">
                     <option value="">Select a name...</option>
-                    <option value="Billy">Billy</option>
-                    <option value="Sally">Sally</option>
-                    <option value="Jill">Jill</option>
-                    <option value="Joe">Joe</option>
-
                 </select>
             </div>
 

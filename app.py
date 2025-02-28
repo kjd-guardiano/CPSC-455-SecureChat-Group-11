@@ -30,11 +30,14 @@ users = clients.clients()   #class that stores info on all clients
 @app.route('/') 
 @access_limiter.limit("10 per hour")
 def index():
+    
     return render_template('index.html')
 
 @socketio.on('connect')
 def handle_connect():
+    user_names = users.retrieve_user_list()
     print('Client sid:',request.sid, ' connected!')
+    socketio.emit('send_user_list', user_names)
 
 #authenticates the user given username/password
 @socketio.on('authenticate')
