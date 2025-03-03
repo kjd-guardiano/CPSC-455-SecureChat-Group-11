@@ -7,7 +7,8 @@ class client:
         self.name = name
         self.online = False
         self.pid = 0
-        self.limiter = ratelimits.SocketIO_Limiter(1/20, 20)
+        self.msg_limiter = ratelimits.Token_Limiter(1/20, 20)
+        self.login_limiter = ratelimits.Token_Limiter(1/60, 5)
 
    
     def set_pid(self, pid):
@@ -38,10 +39,11 @@ class clients:
         return self.clients_dict[name].pid
 
 
-    def check_limits(self,name):
-        if self.clients_dict[name].limiter.allow_request():
-            return True
-        return False
+    def check_limits(self,name,type):
+        if type=="msg":
+            return self.clients_dict[name].msg_limiter.allow_request()
+        if type=="login":
+            return self.clients_dict[name].login_limiter.allow_request()
 
 
     def check_status(self,name):

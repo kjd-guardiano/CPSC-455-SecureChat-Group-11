@@ -58,18 +58,18 @@ def authenticate(login_info):
 @socketio.on('authenticate')
 def authenticate(login_info):
     username = login_info.get('username')
-    password = login_info.get('password')
-    print(username,password)
-    login_sucess = -1
+    if users.check_limits(username, "login"):
+        password = login_info.get('password')
+        login_sucess = -1
+        #calls the actual fucntion that authenticates 
+        if authentication.pword_check(username,password):
+            login_sucess = 1
+            print(username,' successfully logged in!')
+            users.set_status(username, request.sid)                      #using class now
+        socketio.emit('login1',login_sucess,to=request.sid)
+    else:
+        print("There have been too many attempts to log in, please try again later.")
     
-    
-    if authentication.pword_check(username,password):
-        login_sucess = 1
-        print(username,' successfully logged in!')
-        user_names = users.retrieve_user_list()                       
-        socketio.emit('send_user_list', user_names)
-        users.set_status(username, request.sid)                      #using class now
-    socketio.emit('login1',login_sucess,to=request.sid)
 
 
 @socketio.on('message')
@@ -78,7 +78,7 @@ def handle_message(data):
     username = data.get('user')
     receiver = data.get('receiver')
     
-    if not users.check_limits(username):
+    if not users.check_limits(username, "msg"):
          socketio.emit('response', "Rate-limited! You need to slow down!", to=request.sid)
     else:
 
