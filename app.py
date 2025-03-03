@@ -104,4 +104,4 @@ def disconnect():
 
 if __name__ == '__main__':
   cert = ('security/securechat.crt','security/seckey.key')
-  socketio.run(app, debug=True, ssl_context=cert)
+  socketio.run(app, debug=True, ssl_context=cert, host='0.0.0.0')
