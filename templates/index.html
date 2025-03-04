@@ -8,6 +8,7 @@
         var socket = io.connect('wss://' + document.domain + ':' + location.port);
         var name = '';
         socket.on('connect', function () {
+            //loadScript('static/scripts.js');                                  // replace with path of new js and uncomment when ready
             console.log('Connected to the server');
         });
 
@@ -42,6 +43,16 @@
                 console.log("Login failed");
             }
         });
+
+        function loadScript(url)        //loads multiple scripts
+        {
+            var head = document.getElementsByTagName('head')[0];
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = url;
+            head.appendChild(script);
+        }
+
         function sendMessage() {
             var message = document.getElementById('message').value;
             document.getElementById('sent').innerHTML += message + "<br>";

@@ -73,13 +73,12 @@ def authenticate(login_info):
                 #TODO encrypt dict values
             socketio.emit('login1',dict_login_sucess,to=request.sid)
         else:
-            print("There have been too many attempts to log in, please try again later.")
+            print("Please check your username or try again later.")
     else:
         print("No username provided!")    
 
 
 @socketio.on('message')
-#@message_limiter.limit("10 per minute")
 def handle_message(data):
     username = data.get('user')
     receiver = data.get('receiver')
