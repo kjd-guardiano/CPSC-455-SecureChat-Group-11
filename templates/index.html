@@ -47,7 +47,7 @@
             document.getElementById('sent').innerHTML += message + "<br>";
             var receiver = document.getElementById('receiver').value;
             dict_message = { message: message, user: name, receiver: receiver }
-            socket.emit('message', message_dict);         //sends the dictonary
+            socket.emit('message',dict_message);         //sends the dictonary
         }
 
 

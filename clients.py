@@ -40,10 +40,13 @@ class clients:
 
 
     def check_limits(self,name,type):
-        if type=="msg":
-            return self.clients_dict[name].msg_limiter.allow_request()
-        if type=="login":
-            return self.clients_dict[name].login_limiter.allow_request()
+        client = self.clients_dict.get(name)
+        if client:
+            if type == "msg":
+                return client.msg_limiter.allow_request()
+            if type == "login":
+                return client.login_limiter.allow_request()
+        return False
 
 
     def check_status(self,name):

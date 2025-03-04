@@ -61,7 +61,7 @@ def authenticate(login_info):
     username = login_info.get('username')
     if users.check_limits(username, "login"):
         password = login_info.get('password')
-        login_sucess = -1
+        dict_login_sucess = {0:-1}
         #calls the actual fucntion that authenticates 
         if authentication.pword_check(username,password):
             login_sucess = 1
