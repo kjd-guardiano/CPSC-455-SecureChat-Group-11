@@ -52,6 +52,7 @@
 
 
         function sign_up() {
+            event.preventDefault();
             var username = document.getElementById('Sign_up_username').value;
             var password = document.getElementById('Sign_up_password').value;
             dict_userpass = { username: username, password: password }
@@ -59,6 +60,7 @@
         }
         //sends login info to server to verify
         function login() {
+            event.preventDefault();
             console.log(username, password)
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
@@ -75,17 +77,17 @@
     <h1>COOL CHAT</h1>
 
 
-    <div id="sign_up_form">
+    <form id="sign_up_form" onsubmit="sign_up()">
         <input type="text" id="Sign_up_username" placeholder="username" required><br><br>
         <input type="password" id="Sign_up_password" placeholder="password" required><br><br>
-        <button type="button" onclick="sign_up()">Sign Up</button><br><br>
-    </div>
+        <button type="submit" >Sign Up</button><br><br>
+    </form>
 
-    <div id="login_form">
+    <form id="login_form" onsubmit="login()">
         <input type="text" id="username" placeholder="Username" required><br><br>
         <input type="password" id="password" placeholder="Password" required><br><br>
-        <button type="button" onclick="login()">Login</button><br><br>
-    </div>
+        <button type="submit">Login</button><br><br>
+    </form>
 
     <div id="messageContainer" style="display:none;">
         <div id="messageContainer">

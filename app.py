@@ -45,14 +45,12 @@ def authenticate(login_info):
     password = login_info.get('password')
     sign_up_sucess = -1
     if authentication.sign_up(username,password):
-        sign_up_sucess = 1
+        sign_up_success = 1
         print(username,' successfully logged in!')
         users.add_user(username)
-        users.set_status(username, request.sid)   
-                           #using class now
-        dict_sign_up_sucess = {0: sign_up_sucess}
+        dict_sign_up_success = {0: sign_up_success}
         #TODO encrypt dict values
-    socketio.emit('signup',dict_sign_up_sucess,to=request.sid)
+    socketio.emit('signup',dict_sign_up_success,to=request.sid)
 
 
 #authenticates the user given username/password
@@ -64,15 +62,15 @@ def authenticate(login_info):
         dict_login_sucess = {0:-1}
         #calls the actual fucntion that authenticates 
         if authentication.pword_check(username,password):
-            login_sucess = 1
+            login_success = 1
             print(username,' successfully logged in!')
             user_names = users.retrieve_user_dict()   
             #TODO encrypt dict values                    
             socketio.emit('send_user_list', user_names)
             users.set_status(username, request.sid)                      #using class now
-            dict_login_sucess = {0:login_sucess}
+            dict_login_success = {0:login_success}
             #TODO encrypt dict values
-        socketio.emit('login1',dict_login_sucess,to=request.sid)
+        socketio.emit('login1',dict_login_success,to=request.sid)
     else:
         print("There have been too many attempts to log in, please try again later.")
     
@@ -102,6 +100,7 @@ def handle_message(data):
             socketio.emit('response', dict_error_msg, to=request.sid)
 
         else:
+            users.store_chat(username,receiver,message)
             dict_message = {0:message1}
             #TODO encrypt dict values
             socketio.emit('response',dict_message , to =users.retrieve_sid(receiver))      #sends back the message as a single string

@@ -1,5 +1,6 @@
 import ratelimits
-
+import json
+import os
  
 class client:
 
@@ -72,4 +73,32 @@ class clients:
                 self.clients_dict[user].online = False
                 self.clients_dict[user].pid = 0
 
-    
+    def store_chat(self, sender, receiver, message):
+        # Create a unique file name for each conversation
+        folder_name = "chat_logs"
+        if not os.path.exists(folder_name):  # Check if the folder exists
+            os.makedirs(folder_name)  # Create the folder if it doesn't exist
+        
+        # Define the path with the folder
+        file_name = os.path.join(folder_name, "_".join(sorted([sender, receiver])) + "_chat_log.json")
+
+        # Prepare the chat log entry
+        log_entry = {
+            0: sender,
+            1: receiver,
+            2: message,
+        }
+
+        # Read existing log or create a new one
+        try:
+            with open(file_name, "r") as file:
+                chat_logs = json.load(file)
+        except FileNotFoundError:
+            chat_logs = []
+
+        # Append the new message to the log
+        chat_logs.append(log_entry)
+
+        # Save the updated chat log back to the JSON file
+        with open(file_name, "w") as file:
+            json.dump(chat_logs, file, indent=4)
