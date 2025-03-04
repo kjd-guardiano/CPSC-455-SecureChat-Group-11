@@ -43,12 +43,12 @@ def handle_connect():
 def authenticate(login_info):
     username = login_info.get('username')
     password = login_info.get('password')
-    sign_up_sucess = -1
+    dict_sign_up_success = {0: -1}
     if authentication.sign_up(username,password):
-        sign_up_success = 1
+        dict_sign_up_success[0] = 1
         print(username,' successfully logged in!')
         users.add_user(username)
-        dict_sign_up_success = {0: sign_up_success}
+        
         #TODO encrypt dict values
     socketio.emit('signup',dict_sign_up_success,to=request.sid)
 
@@ -58,9 +58,9 @@ def authenticate(login_info):
 def authenticate(login_info):
     username = login_info.get('username')
     if username:
+        dict_login_sucess = {0:-1}
         if users.check_limits(username, "login"):
             password = login_info.get('password')
-            dict_login_sucess = {0:-1}
             #calls the actual fucntion that authenticates 
             if authentication.pword_check(username,password):
                 login_sucess = 1
