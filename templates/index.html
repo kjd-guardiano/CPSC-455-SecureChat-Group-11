@@ -4,47 +4,12 @@
 <head>
     <title>COOL CHAT</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
-    <script type="text/javascript">
-        var socket = io.connect('wss://' + document.domain + ':' + location.port);
-        var name = '';
-        socket.on('connect', function () {
-            //loadScript('static/scripts.js');                                  // replace with path of new js and uncomment when ready
-            console.log('Connected to the server');
-        });
+    <script src="static/scripts.js"></script>
+</head>
 
-        socket.on('response', function (data) {
-            console.log('Server says: ' + data[0]);
-            document.getElementById('received').innerHTML += data[0] + "<br>";      //adds message to list
-        });
-
-        socket.on('send_user_list', function (data) {
-            var users = Object.values(data);  // Extract the user names from the dictionary
-            var receiverSelect = document.getElementById('receiver');
-
-            // Remove all existing options
-            receiverSelect.options.length = 0;
-            // Add new options based on the users array
-            users.forEach(function (user) {
-                receiverSelect.add(new Option(user, user));
-            });
-        });
-
-
-        //recieves the success or failure of login attempt
-        socket.on('login1', function (data) {
-            if (data[0] === 1) {
-                name = document.getElementById('username').value;
-
-                // Display the username
-                document.getElementById('userDisplay').innerText = 'Logged in as: ' + name;
-                document.getElementById('messageContainer').style.display = 'block';
-                document.getElementById('login_form').style.display = "none";
-            } else if (data[0] === -1) {
-                console.log("Login failed");
-            }
-        });
-
-        function loadScript(url)        //loads multiple scripts
+<body>
+    <script>
+        function loadScript(url)
         {
             var head = document.getElementsByTagName('head')[0];
             var script = document.createElement('script');
@@ -53,52 +18,22 @@
             head.appendChild(script);
         }
 
-        function sendMessage() {
-            var message = document.getElementById('message').value;
-            document.getElementById('sent').innerHTML += message + "<br>";
-            var receiver = document.getElementById('receiver').value;
-            dict_message = { message: message, user: name, receiver: receiver }
-            socket.emit('message',dict_message);         //sends the dictonary
-        }
-
-
-        function sign_up() {
-            event.preventDefault();
-            var username = document.getElementById('Sign_up_username').value;
-            var password = document.getElementById('Sign_up_password').value;
-            dict_userpass = { username: username, password: password }
-            socket.emit('sign_up', dict_userpass);
-        }
-        //sends login info to server to verify
-        function login() {
-            event.preventDefault();
-            console.log(username, password)
-            var username = document.getElementById('username').value;
-            var password = document.getElementById('password').value;
-            dict_userpass = { username: username, password: password }
-            socket.emit('authenticate',dict_userpass );
-        }
-
-
-
+        loadScript('');
     </script>
-</head>
-
-<body>
     <h1>COOL CHAT</h1>
 
 
-    <form id="sign_up_form" onsubmit="sign_up()">
+    <div id="sign_up_form">
         <input type="text" id="Sign_up_username" placeholder="username" required><br><br>
         <input type="password" id="Sign_up_password" placeholder="password" required><br><br>
-        <button type="submit" >Sign Up</button><br><br>
-    </form>
+        <button type="button" onclick="sign_up()">Sign Up</button><br><br>
+    </div>
 
-    <form id="login_form" onsubmit="login()">
+    <div id="login_form">
         <input type="text" id="username" placeholder="Username" required><br><br>
         <input type="password" id="password" placeholder="Password" required><br><br>
-        <button type="submit">Login</button><br><br>
-    </form>
+        <button type="button" onclick="login()">Login</button><br><br>
+    </div>
 
     <div id="messageContainer" style="display:none;">
         <div id="messageContainer">
