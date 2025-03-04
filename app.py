@@ -50,8 +50,9 @@ def authenticate(login_info):
         users.add_user(username)
         users.set_status(username, request.sid)   
                            #using class now
-    
-    socketio.emit('signup',sign_up_sucess,to=request.sid)
+        dict_sign_up_sucess = {0: sign_up_sucess}
+        #TODO encrypt dict values
+    socketio.emit('signup',dict_sign_up_sucess,to=request.sid)
 
 
 #authenticates the user given username/password
@@ -65,10 +66,13 @@ def authenticate(login_info):
         if authentication.pword_check(username,password):
             login_sucess = 1
             print(username,' successfully logged in!')
-            user_names = users.retrieve_user_list()                       
+            user_names = users.retrieve_user_dict()   
+            #TODO encrypt dict values                    
             socketio.emit('send_user_list', user_names)
             users.set_status(username, request.sid)                      #using class now
-        socketio.emit('login1',login_sucess,to=request.sid)
+            dict_login_sucess = {0:login_sucess}
+            #TODO encrypt dict values
+        socketio.emit('login1',dict_login_sucess,to=request.sid)
     else:
         print("There have been too many attempts to log in, please try again later.")
     
@@ -81,7 +85,9 @@ def handle_message(data):
     receiver = data.get('receiver')
     
     if not users.check_limits(username, "msg"):
-         socketio.emit('response', "Rate-limited! You need to slow down!", to=request.sid)
+         dict_rate_error = {0:"Rate-limited! You need to slow down!"}
+         #TODO encrypt dict values
+         socketio.emit('response',dict_rate_error , to=request.sid)
     else:
 
         message = data.get('message')    #sets message from dictionary
@@ -91,10 +97,14 @@ def handle_message(data):
 
         if not users.check_status(receiver):
             error_msg = f"{receiver} is not online"
-            socketio.emit('response', error_msg, to=request.sid)
+            dict_error_msg = {0:error_msg}
+            #TODO encrypt dict values
+            socketio.emit('response', dict_error_msg, to=request.sid)
 
         else:
-            socketio.emit('response', message1, to =users.retrieve_sid(receiver))      #sends back the message as a single string
+            dict_message = {0:message1}
+            #TODO encrypt dict values
+            socketio.emit('response',dict_message , to =users.retrieve_sid(receiver))      #sends back the message as a single string
   
 
        

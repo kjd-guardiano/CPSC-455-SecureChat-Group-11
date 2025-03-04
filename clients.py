@@ -29,7 +29,7 @@ class clients:
                 username, _ = line.strip().split(' ', 1)
                 # Create a client instance for each username and store it in the dictionary
                 self.clients_dict[username] = client(username)
-            print(self.clients_dict)
+            
 
     def set_status(self,name,pid):
         self.clients_dict[name].set_pid(pid)
@@ -49,11 +49,14 @@ class clients:
     def check_status(self,name):
         return self.clients_dict[name].online
 
-    def retrieve_user_list(self):
-        user_list = []
+    def retrieve_user_dict(self):
+        i = 0
+        user_list = {}
         for name in self.clients_dict:
-            user_list.append(name)
+            user_list[i] = name
+            i +=1
         print(user_list)
+        
         return user_list
     
     def add_user(self,name):

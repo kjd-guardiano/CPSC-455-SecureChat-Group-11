@@ -12,37 +12,33 @@
         });
 
         socket.on('response', function (data) {
-            console.log('Server says: ' + data);
-            document.getElementById('received').innerHTML += data + "<br>";      //adds message to list
+            console.log('Server says: ' + data[0]);
+            document.getElementById('received').innerHTML += data[0] + "<br>";      //adds message to list
         });
 
         socket.on('send_user_list', function (data) {
-    var users = data;  // Extract the user list from the message
-    var receiverSelect = document.getElementById('receiver');
-    
-    // Remove all existing options
-    receiverSelect.options.length = 0;
+            var users = Object.values(data);  // Extract the user names from the dictionary
+            var receiverSelect = document.getElementById('receiver');
 
-    // Add the default "Select a name..." option
-    receiverSelect.add(new Option('Select a name...', ''));
-
-    // Add new options based on the users array
-    users.forEach(function (user) {
-        receiverSelect.add(new Option(user, user));
-    });
-});
+            // Remove all existing options
+            receiverSelect.options.length = 0;
+            // Add new options based on the users array
+            users.forEach(function (user) {
+                receiverSelect.add(new Option(user, user));
+            });
+        });
 
 
         //recieves the success or failure of login attempt
         socket.on('login1', function (data) {
-            if (data === 1) {
+            if (data[0] === 1) {
                 name = document.getElementById('username').value;
 
                 // Display the username
                 document.getElementById('userDisplay').innerText = 'Logged in as: ' + name;
                 document.getElementById('messageContainer').style.display = 'block';
                 document.getElementById('login_form').style.display = "none";
-            } else if (data === -1) {
+            } else if (data[0] === -1) {
                 console.log("Login failed");
             }
         });
@@ -50,21 +46,24 @@
             var message = document.getElementById('message').value;
             document.getElementById('sent').innerHTML += message + "<br>";
             var receiver = document.getElementById('receiver').value;
-            socket.emit('message', { message: message, user: name, receiver: receiver });         //sends the dictonary
+            dict_message = { message: message, user: name, receiver: receiver }
+            socket.emit('message', message_dict);         //sends the dictonary
         }
 
 
         function sign_up() {
             var username = document.getElementById('Sign_up_username').value;
             var password = document.getElementById('Sign_up_password').value;
-            socket.emit('sign_up', { username: username, password: password });
+            dict_userpass = { username: username, password: password }
+            socket.emit('sign_up', dict_userpass);
         }
         //sends login info to server to verify
         function login() {
-            console.log(username,password)
+            console.log(username, password)
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
-            socket.emit('authenticate', { username: username, password: password });
+            dict_userpass = { username: username, password: password }
+            socket.emit('authenticate',dict_userpass );
         }
 
 
@@ -96,7 +95,7 @@
             <div class="tab-container">
                 Choose receiver of message
                 <select id="receiver">
-                    <option value="">Select a name...</option>
+                    
                 </select>
             </div>
 
