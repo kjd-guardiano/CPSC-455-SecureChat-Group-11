@@ -48,6 +48,7 @@
 
 
         function sign_up() {
+            event.preventDefault();
             var username = document.getElementById('Sign_up_username').value;
             var password = document.getElementById('Sign_up_password').value;
             dict_userpass = { username: username, password: password }
@@ -55,6 +56,7 @@
         }
         //sends login info to server to verify
         function login() {
+            event.preventDefault();
             console.log(username, password)
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
