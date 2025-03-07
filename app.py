@@ -27,11 +27,28 @@ users = clients.clients()   #class that stores info on all clients
 
 @app.route('/') 
 def index():
+    
     return render_template('index.html')
 
 @socketio.on('connect')
 def handle_connect():
+    
     print('Client sid:',request.sid, ' connected!')
+    
+
+@socketio.on('sign_up')
+def authenticate(login_info):
+    username = login_info.get('username')
+    password = login_info.get('password')
+    dict_sign_up_success = {0: -1}
+    if authentication.sign_up(username,password):
+        dict_sign_up_success[0] = 1
+        print(username,' successfully logged in!')
+        users.add_user(username)
+        
+        #TODO encrypt dict values
+    socketio.emit('signup',dict_sign_up_success,to=request.sid)
+
 
 #authenticates the user given username/password
 @socketio.on('authenticate')
@@ -46,13 +63,16 @@ def authenticate(login_info):
         users.set_status(username, request.sid)                      #using class now
     socketio.emit('login1',login_sucess,to=request.sid)
 
+
 @socketio.on('message')
 def handle_message(data):
     username = data.get('user')
     receiver = data.get('receiver')
     
-    if not users.check_limits(username):
-         socketio.emit('response', "Rate-limited! You need to slow down!", to=request.sid)
+    if not users.check_limits(username, "msg"):
+         dict_rate_error = {0:"Rate-limited! You need to slow down!"}
+         #TODO encrypt dict values
+         socketio.emit('response',dict_rate_error , to=request.sid)
     else:
 
         message = data.get('message')    #sets message from dictionary
@@ -62,10 +82,15 @@ def handle_message(data):
 
         if not users.check_status(receiver):
             error_msg = f"{receiver} is not online"
-            socketio.emit('response', error_msg, to=request.sid)
+            dict_error_msg = {0:error_msg}
+            #TODO encrypt dict values
+            socketio.emit('response', dict_error_msg, to=request.sid)
 
         else:
-            socketio.emit('response', message1, to =users.retrieve_sid(receiver))      #sends back the message as a single string
+            users.store_chat(username,receiver,message)
+            dict_message = {0:message1}
+            #TODO encrypt dict values
+            socketio.emit('response',dict_message , to =users.retrieve_sid(receiver))      #sends back the message as a single string
   
 
        
@@ -76,5 +101,5 @@ def disconnect():
     users.disconnect(request.sid)
 
 if __name__ == '__main__':
-  cert = ('securechat.crt','seckey.key')
+  cert = ('security/securechat.crt','security/seckey.key')
   socketio.run(app, debug=True, ssl_context=cert, host='0.0.0.0')

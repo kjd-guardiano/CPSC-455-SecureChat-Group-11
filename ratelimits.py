@@ -4,7 +4,7 @@ import time
 from contextlib import asynccontextmanager
 
 #bucket-based rate limiter (For SocketIO functions)
-class SocketIO_Limiter:
+class Token_Limiter:
     def __init__(self, rate, capacity) -> None:
         self.capacity = capacity
         self.tokens = capacity
