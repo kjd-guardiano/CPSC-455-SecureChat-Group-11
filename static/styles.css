@@ -1,0 +1,30 @@
+body {
+    font-family: monospace;
+}
+
+title {
+    font-family: Verdana;
+}
+
+h1 {
+    font-family: Verdana;
+    text-align: left;
+}
+
+.center {
+    display: table;
+    margin: auto;
+}
+
+h2 {
+   font-family: Verdana;
+   text-align: center; 
+}
+
+form{
+    font-family: monospace;
+    text-align: center;
+    font-family: monospace;
+    font-size: 120%;
+}
+

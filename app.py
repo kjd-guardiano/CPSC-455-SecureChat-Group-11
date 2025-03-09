@@ -54,14 +54,25 @@ def authenticate(login_info):
 @socketio.on('authenticate')
 def authenticate(login_info):
     username = login_info.get('username')
-    password = login_info.get('password')
-    login_sucess = -1
-    #calls the actual fucntion that authenticates 
-    if authentication.pword_check(username,password):
-        login_sucess = 1
-        print(username,' successfully logged in!')
-        users.set_status(username, request.sid)                      #using class now
-    socketio.emit('login1',login_sucess,to=request.sid)
+    if username:
+        dict_login_sucess = {0:-1}
+        if users.check_limits(username, "login"):
+            password = login_info.get('password')
+            #calls the actual fucntion that authenticates 
+            if authentication.pword_check(username,password):
+                login_sucess = 1
+                print(username,' successfully logged in!')
+                user_names = users.retrieve_user_dict()   
+                #TODO encrypt dict values                    
+                socketio.emit('send_user_list', user_names)
+                users.set_status(username, request.sid)                      #using class now
+                dict_login_sucess = {0:login_sucess}
+                #TODO encrypt dict values
+            socketio.emit('login1',dict_login_sucess,to=request.sid)
+        else:
+            print("Please check your username or try again later.")
+    else:
+        print("No username provided!")
 
 
 @socketio.on('message')
