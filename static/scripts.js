@@ -31,6 +31,8 @@
                 document.getElementById('userDisplay').innerText = 'Logged in as: ' + name;
                 document.getElementById('messageContainer').style.display = 'block';
                 document.getElementById('login_form').style.display = "none";
+                document.getElementById('sign_up_form').style.display = "none";
+              
             } else if (data[0] === -1) {
                 console.log("Login failed");
             }
