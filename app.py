@@ -87,10 +87,10 @@ def handle_message(data):
     else:
 
         message = data.get('message')    #sets message from dictionary
-        message1 = f"Message: '{message}'\nSent by User: {username}" #formats message
-
-        print(message1)
-
+        if not(message==''):
+            message1 = f"{username}: {message}" #formats message; changed for chat style conformity
+            print(message1)
+            
         if not users.check_status(receiver):
             error_msg = f"{receiver} is not online"
             dict_error_msg = {0:error_msg}

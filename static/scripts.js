@@ -6,7 +6,8 @@ socket.on('connect', function () {
 
 socket.on('response', function (data) {
     console.log('Server says: ' + data[0]);
-    document.getElementById('received').innerHTML += data[0] + "<br>";      //adds message to list
+    document.getElementById('received').value += data[0] + '\n';      //adds message to list
+    document.getElementById('received').scrollTop = document.getElementById('received').scrollHeight;
 });
 
 socket.on('send_user_list', function (data) {
@@ -26,7 +27,7 @@ socket.on('send_user_list', function (data) {
 socket.on('login1', function (data) {
     if (data[0] === 1) {
         name = document.getElementById('username').value;
-
+        headerToggle();
         // Display the username
         document.getElementById('userDisplay').innerText = 'Logged in as: ' + name;
         document.getElementById('messageContainer').style.display = 'block';
@@ -42,7 +43,7 @@ socket.on('login1', function (data) {
 
 function sendMessage() {
     var message = document.getElementById('message').value;
-    document.getElementById('sent').innerHTML += message + "<br>";
+    //document.getElementById('sent').innerHTML += message + "<br>";
     var receiver = document.getElementById('receiver').value;
     dict_message = { message: message, user: name, receiver: receiver }
     socket.emit('message',dict_message);         //sends the dictonary
@@ -63,10 +64,10 @@ function login() {
     var username = document.getElementById('username').value;
     var password = document.getElementById('password').value;
     dict_userpass = { username: username, password: password }
-    headerToggle();
     socket.emit('authenticate',dict_userpass );
 }
 
+// for swapping from 
 function headerToggle() {
     var loginHeader = document.getElementById('loginContainer');
     if (loginHeader.style.display === "none"){
@@ -82,4 +83,8 @@ function headerToggle() {
     else {
         signupHeader.style.display = "none";
     }
+}
+
+function adjustHeight(el){
+    el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "40px";
 }

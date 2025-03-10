@@ -1,9 +1,14 @@
+html {
+    background-color:grey;
+}
+
 body {
     font-family: monospace;
 }
 
 title {
     font-family: Verdana;
+    background-color:lightgrey;
 }
 
 h1 {
@@ -11,20 +16,140 @@ h1 {
     text-align: left;
 }
 
-.center {
-    display: table;
-    margin: auto;
+input {
+    color: white;
+    background-color: darkgrey;
+}
+
+button {
+    border: double teal;
+    background-color: lightgrey;
+    font-family: Verdana;
+}
+
+.logoutButton {
+    position:fixed;
+    top: 4px;
+    right: 10px;
+    border: 6px double rgb(223, 228, 231);
+    background-color: darkgrey;
+    font-family: Verdana;
+    width: 5%;
+    height: 6%;
+}
+
+.logoutButton:hover:not(disabled) {
+    background: linear-gradient(92.83deg, rgb(223, 228, 231) 0%, rgb(125, 125, 126) 100%)
+}
+
+.logoutButton:active:not(disabled) {
+    background: rgb(125, 125, 126);
+}
+
+.sendMsgButton {
+    position: fixed;
+    right: 24px;
+    bottom: 38px;
+    align-items: center;
+    border: 6px double cornflowerblue;
+    background-color: rgb(153, 202, 241);
+    font-family: Verdana;
+    width:10%;
+    height:6%;
+}
+
+.formButton {
+    align-items: center;
+    border: 6px double cornflowerblue;
+    background-color: rgb(153, 202, 241);
+    font-family: Verdana;
+    width:10%;
+    height:20%;
+}
+
+.formButton:hover:not(disabled) {
+    background: linear-gradient(92.83deg, rgb(153, 202, 241) 0%, rgb(85, 128, 247) 100%)
+}
+
+.formButton:active:not(disabled) {
+    background: rgb(32, 67, 163);
 }
 
 h2 {
+   border: darkgrey;
    font-family: Verdana;
    text-align: center; 
+}
+
+.h2Span {
+    border: 4px black double;
+    font-size: medium;
+}
+
+.userDisplay {
+    font-family: 'Segoe UI';
+    font-size:150%;
+    border: 10px double grey;
+    background-color: lightgrey;
+}
+
+hr {
+    border: none;
+    height: 2px;
+    background-color: #333;
+    width: 100%;
+    text-align: center;
+    margin: 0%;
 }
 
 form{
     font-family: monospace;
     text-align: center;
-    font-family: monospace;
     font-size: 120%;
 }
 
+textarea {
+    resize: none;
+    background-color: lightgrey;
+    border: solid 4px teal;
+}
+
+.messageTextarea {
+    resize: none;
+    background-color: lightgrey;
+    border: solid 4px teal;
+    font-family:monospace; 
+    font-size: medium; 
+    width: 90%; 
+    caret-color: transparent;
+}
+
+.emoji-picker {
+    position: relative;
+}
+
+.emoji-input {
+    position: fixed;
+    bottom: 10px;
+    right: 4px;
+    left: 4px;
+}
+
+.emoji-container {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    overflow: auto;
+    border: 1px solid #333;
+    z-index: 1;
+}
+
+.emoji-container .emoji {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.emoji-container .emoji:hover {
+    background-color: #ddd;
+}
