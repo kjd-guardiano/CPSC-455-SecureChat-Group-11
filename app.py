@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from ratelimits import *
 import authentication
 import clients
+from security import rsa_crypto
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
@@ -24,6 +25,7 @@ access_limiter = Limiter(get_remote_address,
 socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True)
 
 users = clients.clients()   #class that stores info on all clients
+rsa_helper = rsa_crypto.rsa_help()
 
 @app.route('/') 
 def index():
@@ -34,16 +36,18 @@ def index():
 def handle_connect():
     
     print('Client sid:',request.sid, ' connected!')
-    
+    server_pubkey = rsa_helper.return_public()
+    socketio.emit('public_key',server_pubkey,to=request.sid)
 
 @socketio.on('sign_up')
 def authenticate(login_info):
-    username = login_info.get('username')
-    password = login_info.get('password')
+    decrypted_dict = rsa_helper.decrypt_login(login_info)
+    username = decrypted_dict['username']
+    password = decrypted_dict['password']
     dict_sign_up_success = {0: -1}
     if authentication.sign_up(username,password):
         dict_sign_up_success[0] = 1
-        print(username,' successfully logged in!')
+        print(username,' successfully signed up!')
         users.add_user(username)
         
         #TODO encrypt dict values
@@ -53,11 +57,12 @@ def authenticate(login_info):
 #authenticates the user given username/password
 @socketio.on('authenticate')
 def authenticate(login_info):
-    username = login_info.get('username')
+    decrypted_dict = rsa_helper.decrypt_login(login_info)
+    username = decrypted_dict['username']
+    password = decrypted_dict['password']
     if username:
         dict_login_sucess = {0:-1}
         if users.check_limits(username, "login"):
-            password = login_info.get('password')
             #calls the actual fucntion that authenticates 
             if authentication.pword_check(username,password):
                 login_sucess = 1

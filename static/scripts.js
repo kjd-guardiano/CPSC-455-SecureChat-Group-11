@@ -55,16 +55,17 @@ function sign_up() {
     var username = document.getElementById('Sign_up_username').value;
     var password = document.getElementById('Sign_up_password').value;
     dict_userpass = { username: username, password: password }
-    socket.emit('sign_up', dict_userpass);
+    encrypted = encrypt_login(dict_userpass)
+    socket.emit('sign_up', encrypted);
 }
 //sends login info to server to verify
 function login() {
     event.preventDefault();
-    console.log(username, password);
     var username = document.getElementById('username').value;
     var password = document.getElementById('password').value;
     dict_userpass = { username: username, password: password }
-    socket.emit('authenticate',dict_userpass );
+    encrypted =encrypt_login(dict_userpass)
+    socket.emit('authenticate',encrypted );
 }
 
 // for swapping from 
