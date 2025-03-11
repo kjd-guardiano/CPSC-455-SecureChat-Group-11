@@ -132,7 +132,7 @@ textarea {
     margin: 10px;
     display: none; /* Hidden by default, shown based on selection */
     position: relative;
-    overflow: hidden;
+    overflow: scroll;
 }
 
 

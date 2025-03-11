@@ -15,6 +15,7 @@ socket.on('response', function (data) {
         var messageElement = document.createElement('div');
         messageElement.textContent = data[0];
         messageDisplay.appendChild(messageElement);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
 });
