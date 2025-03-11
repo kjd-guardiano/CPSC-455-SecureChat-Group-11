@@ -21,6 +21,7 @@ socket.on('response', function (data) {
 
 
 
+
 socket.on('send_user_list', function (data) {
     var users = Object.values(data);  // Extract the user names from the dictionary
     var receiverSelect = document.getElementById('receiver');

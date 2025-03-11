@@ -86,7 +86,7 @@ def handle_message(data):
     receiver = data.get('receiver')
     
     if not users.check_limits(username, "msg"):
-         dict_rate_error = {0:"Rate-limited! You need to slow down!",1:username}
+         dict_rate_error = {0:"Rate-limited! You need to slow down!",1:receiver}
          #TODO encrypt dict values
          socketio.emit('response',dict_rate_error , to=request.sid)
     else:
@@ -98,7 +98,7 @@ def handle_message(data):
             
         if not users.check_status(receiver):
             error_msg = f"{receiver} is not online"
-            dict_error_msg = {0:error_msg,1:username}
+            dict_error_msg = {0:error_msg,1:receiver}
             #TODO encrypt dict values
             socketio.emit('response', dict_error_msg, to=request.sid)
 
