@@ -45,7 +45,10 @@ button {
 .logoutButton:active:not(disabled) {
     background: rgb(125, 125, 126);
 }
-
+.messageContainer{
+    display: flex;
+    flex-direction: column;
+}
 .sendMsgButton {
     position: fixed;
     right: 24px;
@@ -204,3 +207,4 @@ textarea {
 .received-message .message-text {
     background-color: #dcdcdc; 
 }
+
