@@ -112,6 +112,7 @@ textarea {
     resize: none;
     background-color: lightgrey;
     border: solid 4px teal;
+    
 }
 
 .messageTextarea {
@@ -122,17 +123,19 @@ textarea {
     font-size: medium; 
     width: 90%; 
     caret-color: transparent;
+    
 }
 
 .chat-window {
-    width: 90%; 
+    width: 70%; 
     height: 400px;
-    border: 4px solid #008080; /* Teal border */
-    background-color: #f1f1f1; /* Light gray background */
+    border: 4px solid #008080; 
+    background-color: #f1f1f1; 
     margin: 10px;
-    display: none; /* Hidden by default, shown based on selection */
+    display: none; 
     position: relative;
     overflow: scroll;
+    padding: 10px;
 }
 
 
@@ -164,4 +167,40 @@ textarea {
 
 .emoji-container .emoji:hover {
     background-color: #ddd;
+}
+
+
+
+
+.message {
+    display: flex;
+    margin: 5px 0;
+}
+
+
+.sent-message {
+    justify-content: flex-end; 
+}
+
+
+.received-message {
+    justify-content: flex-start; 
+}
+
+
+.message .message-text {
+    max-width: 80%; 
+    padding: 8px 12px;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+    word-wrap: break-word;
+}
+
+.sent-message .message-text {
+    background-color: teal; 
+    color: white;
+}
+
+.received-message .message-text {
+    background-color: #dcdcdc; 
 }

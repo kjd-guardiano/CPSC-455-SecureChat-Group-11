@@ -11,7 +11,7 @@ socket.on('response', function (data) {
     var receiver1 = data[1];
     if (receiver1 == global_receiver) {
     console.log(receiver1);
-    add_chat(receiver1,data[0])
+    add_chat('receive',receiver1,data[0])
     }
 });
 
@@ -43,7 +43,7 @@ function sendMessage() {
         return
     }
     chat_window_msg = 'you: ' + message
-   add_chat(receiver,chat_window_msg)
+   add_chat('send',receiver,chat_window_msg)
 
     
     // Create message dictionary and emit it to the server

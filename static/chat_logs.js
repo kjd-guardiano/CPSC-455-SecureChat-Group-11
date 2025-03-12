@@ -3,36 +3,45 @@ received_log = [];
 global_receiver = ''
 
 socket.on('send_user_list', function (data) {
-    console.log('SENDINGDDDD')
-    var users = Object.values(data);  // Extract the user names from the dictionary
+    var users = Object.values(data);
     var receiverSelect = document.getElementById('receiver');
 
-    // Remove all existing options
-    receiverSelect.options.length = 0;
-    
-    receiverSelect.add(new Option('', ''));
-    // Add new options based on the users array
-    users.forEach(function (user) {
-        receiverSelect.add(new Option(user, user));
+    var blankOptionExists = [...receiverSelect.options].some(o => o.value === '');
+    if (!blankOptionExists) {
+        receiverSelect.add(new Option('', ''));
+    }
+    users.forEach(user => {
+        
+        var userExists = [...receiverSelect.options].some(o => o.value === user);
+        if (!userExists) {
+            receiverSelect.add(new Option(user, user));
+        }
 
-        // Check if the user already has a chat window open
         if (!document.getElementById('chat-window-' + user)) {
-            // Create a new chat window for each user
             createChatWindow(user);
         }
 
-        // Add to the list of chatters
-        chatters.push(user);
+        if (!chatters.includes(user)) {
+            chatters.push(user);
+        }
     });
 
-    // Hide all chat windows except the one currently selected in the dropdown
+    [...receiverSelect.options].forEach(option => {
+        if (option.value !== '' && !users.includes(option.value)) {
+            receiverSelect.remove(option.index);
+        }
+    });
+
     hideAllChatWindows();
     var selectedReceiver = receiverSelect.value;
     if (selectedReceiver) {
         showChatWindow(selectedReceiver);
     }
-    
 });
+
+
+
+
 
 document.getElementById('receiver').addEventListener('change', function () {
     
@@ -59,10 +68,10 @@ socket.on('send_log', function (data1) {
     data1.reverse().forEach(item => {
         if (item["0"] == name){
             message = "you: " + item["2"]
-            add_chat( global_receiver, message,1)
+            add_chat('send', global_receiver, message,1)
         }
         else{
-            add_chat(global_receiver,item["0"]+": "+item["2"],1)
+            add_chat('receive',global_receiver,item["0"]+": "+item["2"],1)
         }
       
     });
@@ -73,21 +82,38 @@ socket.on('send_log', function (data1) {
 
 
 
-function add_chat(receiver,message,position){
+function add_chat(type,receiver, message, position) {
     var chatWindow = document.getElementById('chat-window-' + receiver);
     if (chatWindow) {
         var messageDisplay = chatWindow.querySelector('.message-display');
+        
+        // Create message container div
         var messageElement = document.createElement('div');
-        messageElement.textContent = message;
-        messageDisplay.appendChild(messageElement);
+        messageElement.classList.add('message');
+
+        // Create message text element
+        var messageText = document.createElement('div');
+        messageText.classList.add('message-text');
+        messageText.textContent = message;
+
+        // Check if the message is sent by the user or received
+        if (type === 'send') {  // Sent message
+            messageElement.classList.add('sent-message');
+        } else {  // Received message
+            messageElement.classList.add('received-message');
+        }
+
+        // Append message text to the message container
+        messageElement.appendChild(messageText);
+
+        // Insert the message at the top if position is 1
         if (position === 1) {
-            // Insert the message at the top
             messageDisplay.insertAdjacentElement('afterbegin', messageElement);
         } else {
-            // Append the message at the bottom
             messageDisplay.appendChild(messageElement);
         }
 
+        // Scroll the chat window to the bottom
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 }
