@@ -39,7 +39,7 @@ socket.on('login1', function (data) {
 function sendMessage() {
     var message = document.getElementById('message').value;
     var receiver = document.getElementById('receiver').value;
-    if (!receiver){
+    if (!message){
         return
     }
     chat_window_msg = 'you: ' + message
