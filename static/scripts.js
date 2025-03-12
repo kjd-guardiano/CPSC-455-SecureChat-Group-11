@@ -35,7 +35,6 @@ socket.on('login1', function (data) {
 });
 
 
-
 function sendMessage() {
     var message = document.getElementById('message').value;
     var receiver = document.getElementById('receiver').value;
@@ -91,4 +90,62 @@ function headerToggle() {
 
 function adjustHeight(el){
     el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "40px";
+}
+
+//for uploading
+function uploadFile() {
+    const file = document.getElementById('fileInput').files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const fileData = event.target.result;
+
+            // Emit file upload to server (send binary data as ArrayBuffer)
+            socket.emit('upload_file', {
+                filename: file.name,
+                file_data: fileData
+            });
+        };
+        reader.readAsArrayBuffer(file); // Read file as binary data
+    }
+}
+
+//checks for file uploading
+socket.on('file_received', function(data) {
+    alert(`File uploaded: ${data.filename}`);
+    addFileToList(data.filename);
+});
+
+// Download File function
+function downloadFile() {
+    const filename = document.getElementById('filenameInput').value;
+    
+    if (!filename) {
+        alert("Please enter a filename.");
+        return;
+    }
+    
+    // Emit request to download the file from server
+    socket.emit('download_file', { filename });
+
+    // Listen for the file download information
+    socket.on('file_download', function(data) {
+        // The client will download the file by fetching it from the server
+        const fileUrl = `/uploads/${data.filename}`;
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = data.filename;
+        link.click();
+    });
+
+    // Listen for file not found
+    socket.on('file_not_found', function(data) {
+        alert(`File not found: ${data.filename}`);
+    });
+}
+
+function addFileToList(filename) {
+    const li = document.createElement('li');
+    li.textContent = filename;
+    document.getElementById('fileList').appendChild(li);
 }

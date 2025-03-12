@@ -1,15 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
+from ftplib import FTP
 from flask_limiter.util import get_remote_address
-import asyncio
-import math
-import time
 from contextlib import asynccontextmanager
 from ratelimits import *
-import authentication
-import clients
 from security import rsa_crypto
+import asyncio, math, time, authentication, clients, os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
@@ -21,16 +18,61 @@ access_limiter = Limiter(get_remote_address,
                          storage_uri="memory://")
 
 
+#Directory for file storage
+upload_folder = './SecureChat_Upload'
+#Directory check, creating new folder if the previously specified does not exist.
+if not os.path.exists(upload_folder):
+    os.makedirs(upload_folder)
+
 #socket setup
 socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True)
 
 users = clients.clients()   #class that stores info on all clients
 rsa_helper = rsa_crypto.rsa_help()
 
+#for serving uploaded files on request
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(upload_folder, filename)
+
 @app.route('/') 
 def index():
     
     return render_template('index.html')
+
+#event for file uploading
+@socketio.on('upload_file')
+def handle_upload(data):
+    file_name = data['filename']
+    file_data = data['file_data']
+
+    # Save the file to the server's file system
+    file_path = os.path.join(upload_folder, file_name)
+    
+    # Open the file and write the binary data to it
+    try:
+        with open(file_path, 'wb') as f:
+            f.write(file_data)
+
+        # Emit the file information to the receiving client (file name)
+        socketio.emit('file_received', {'filename': file_name})
+    except Exception as e:
+        print(f"Error during file upload: {e}")
+        socketio.emit('file_error', {'message': 'File upload failed'})
+
+
+#event for file downloading
+@socketio.on('download_file')
+def handle_download(data):
+    file_name = data['filename']
+    file_path = os.path.join(upload_folder, file_name)
+    
+    if os.path.exists(file_path):
+        # Send the file download event back to the requesting client
+        socketio.emit('file_download', {'filename': file_name})
+    else:
+        # If the file doesn't exist, notify the client
+        socketio.emit('file_not_found', {'filename': file_name})
 
 @socketio.on('connect')
 def handle_connect():
