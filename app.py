@@ -109,7 +109,12 @@ def handle_message(data):
             socketio.emit('response',dict_message , to =users.retrieve_sid(receiver))      #sends back the message as a single string
   
 
-       
+@socketio.on('chat_log')
+def send_log(data):
+    sender = data.get('sender')
+    receiver = data.get('receiver')
+    logs = users.get_chat_log(sender,receiver)
+    socketio.emit('send_log',logs,to=request.sid)
 
 
 @socketio.on('disconnect')

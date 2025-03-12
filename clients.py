@@ -102,3 +102,16 @@ class clients:
         # Save the updated chat log back to the JSON file
         with open(file_name, "w") as file:
             json.dump(chat_logs, file, indent=4)
+
+    def get_chat_log(self, sender, receiver):
+        folder_name = "chat_logs"
+        file_name = os.path.join(folder_name, "_".join(sorted([sender, receiver])) + "_chat_log.json")
+        # Check if the file exists
+        if not os.path.exists(file_name):
+            return []  # Return an empty list if the file doesn't exist
+        
+        # Open and read the JSON file
+        with open(file_name, 'r') as file:
+            chat_log = json.load(file)  # Parse the JSON content into a Python object (list, dict, etc.)
+        
+        return chat_log
