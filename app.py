@@ -66,10 +66,12 @@ def handle_upload(data):
 def handle_download(data):
     file_name = data['filename']
     file_path = os.path.join(upload_folder, file_name)
+    #session ID for specific user requesting the download
+    sid = request.sid
     
     if os.path.exists(file_path):
         # Send the file download event back to the requesting client
-        socketio.emit('file_download', {'filename': file_name})
+        socketio.emit('file_download', {'filename': file_name}, room=sid)
     else:
         # If the file doesn't exist, notify the client
         socketio.emit('file_not_found', {'filename': file_name})
