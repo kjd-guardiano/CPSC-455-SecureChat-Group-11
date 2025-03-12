@@ -112,7 +112,7 @@ function uploadFile() {
 
 //checks for file uploading
 socket.on('file_received', function(data) {
-    alert(`File uploaded: ${data.filename}`);
+    //alert(`File uploaded: ${data.filename}`);    preventing universal alert for now.
     addFileToList(data.filename);
 });
 

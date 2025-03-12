@@ -55,10 +55,10 @@ def handle_upload(data):
             f.write(file_data)
 
         # Emit the file information to the receiving client (file name)
-        socketio.emit('file_received', {'filename': file_name})
+        socketio.emit('file_received', {'filename': file_name}, to=request.sid)
     except Exception as e:
         print(f"Error during file upload: {e}")
-        socketio.emit('file_error', {'message': 'File upload failed'})
+        socketio.emit('file_error', {'message': 'File upload failed'}, to=request.sid)
 
 
 #event for file downloading
@@ -67,14 +67,13 @@ def handle_download(data):
     file_name = data['filename']
     file_path = os.path.join(upload_folder, file_name)
     #session ID for specific user requesting the download
-    sid = request.sid
     
     if os.path.exists(file_path):
         # Send the file download event back to the requesting client
-        socketio.emit('file_download', {'filename': file_name}, room=sid)
+        socketio.emit('file_download', {'filename': file_name}, to=request.sid)
     else:
         # If the file doesn't exist, notify the client
-        socketio.emit('file_not_found', {'filename': file_name})
+        socketio.emit('file_not_found', {'filename': file_name}, to=request.sid)
 
 @socketio.on('connect')
 def handle_connect():
