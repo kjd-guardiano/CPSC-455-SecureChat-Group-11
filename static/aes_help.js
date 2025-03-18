@@ -9,6 +9,27 @@ function send_aes_key() {
     socket.emit('send_aes',encrypted_key)
 }
 
+
+function encrypt_aes(msg_dict) {
+    for (let key in msg_dict) {
+        if (msg_dict.hasOwnProperty(key)) {
+            const value = msg_dict[key];
+
+            // Encrypt the value using AES with the server's AES key
+            const encrypted_value = CryptoJS.AES.encrypt(value, server_aes_key, {
+                mode: CryptoJS.mode.ECB, 
+                padding: CryptoJS.pad.Pkcs7
+            }).toString();  // Convert the encrypted message to string
+
+            // Store the encrypted value back in the dictionary
+            msg_dict[key] = encrypted_value;
+        }
+    }
+    console.log(msg_dict);
+    return msg_dict;
+}
+
+
 function decrypt_aes(msg_dict){
 
     for (let key in msg_dict) {

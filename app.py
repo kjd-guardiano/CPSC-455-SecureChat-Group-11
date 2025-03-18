@@ -126,16 +126,19 @@ def authenticate(login_info):
 
 @socketio.on('message')
 def handle_message(data):
-    username = data.get('user')
-    receiver = data.get('receiver')
+    decrypt_dict = aes_helper.decrypt_aes(data,users.get_user(request.sid))
+    #DECRYPTION AES
+    username = decrypt_dict.get('user')
+    receiver = decrypt_dict.get('receiver')
     
     if not users.check_limits(username, "msg"):
          dict_rate_error = {0:"Rate-limited! You need to slow down!",1:receiver}
-         #TODO encrypt dict values
-         socketio.emit('response',dict_rate_error , to=request.sid)
+         encrypted = aes_helper.encrypt_aes(dict_rate_error,username)
+         #ENCRYPTION AES
+         socketio.emit('response',encrypted , to=request.sid)
     else:
 
-        message = data.get('message')    #sets message from dictionary
+        message = decrypt_dict.get('message')    #sets message from dictionary
         if not(message==''):
             message1 = f"{username}: {message}" #formats message; changed for chat style conformity
             print(message1)
@@ -143,13 +146,15 @@ def handle_message(data):
         if not users.check_status(receiver):
             error_msg = f"{receiver} is not online"
             dict_error_msg = {0:error_msg,1:receiver}
-            #TODO encrypt dict values
+            encrypted = aes_helper.encrypt_aes(dict_error_msg,username)
+            #ENCRYPTION AES
             socketio.emit('response', dict_error_msg, to=request.sid)
 
         else:
             users.store_chat(username,receiver,message)
             dict_message = {0:message1,1:username}
             encrypted = aes_helper.encrypt_aes(dict_message,receiver)
+            #ENCRYPTION AES
             socketio.emit('response',encrypted , to =users.retrieve_sid(receiver))      #sends back the message as a single string
   
 

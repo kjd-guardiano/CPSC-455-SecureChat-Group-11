@@ -50,7 +50,9 @@ function sendMessage() {
     
     // Create message dictionary and emit it to the server
     dict_message = { message: message, user: name, receiver: receiver };
-    socket.emit('message', dict_message);  // Sends the dictionary with the message
+    encrypted_dict = encrypt_aes(dict_message)
+    //AES ENCRYPTION
+    socket.emit('message', encrypted_dict);  // Sends the dictionary with the message
 }
 
 
