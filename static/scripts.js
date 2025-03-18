@@ -104,12 +104,14 @@ function uploadFile() {
         const reader = new FileReader();
         reader.onload = function(event) {
             const fileData = event.target.result;
-
+            if (global_receiver){
             // Emit file upload to server (send binary data as ArrayBuffer)
             socket.emit('upload_file', {
                 filename: file.name,
-                file_data: fileData
+                file_data: fileData,
+                receiver: global_receiver
             });
+        }
         };
         reader.readAsArrayBuffer(file); // Read file as binary data
     }
@@ -131,16 +133,21 @@ function downloadFile() {
     }
     
     // Emit request to download the file from server
-    socket.emit('download_file', { filename });
+    socket.emit('download_file', { filename:filename });
 
     // Listen for the file download information
     socket.on('file_download', function(data) {
-        // The client will download the file by fetching it from the server
-        const fileUrl = `/uploads/${data.filename}`;
+        const fileData = data.file_data;  // Binary data of the file
+        const filename = data.filename;   // Filename
+    
+        // Create a Blob from the binary data
+        const blob = new Blob([new Uint8Array(fileData)], { type: 'application/octet-stream' });
+    
+        // Create a link to trigger the download
         const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = data.filename;
-        link.click();
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;  // The downloaded file will have this name
+        link.click();  // Simulate the click to start downloading
     });
 
     // Listen for file not found

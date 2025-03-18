@@ -31,10 +31,7 @@ users = clients.clients()   #class that stores info on all clients
 rsa_helper = rsa_crypto.rsa_help()
 aes_helper = aes_crypto.aes_help()
 
-#for serving uploaded files on request
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(upload_folder, filename)
+
 
 @app.route('/') 
 def index():
@@ -46,6 +43,9 @@ def index():
 def handle_upload(data):
     file_name = data['filename']
     file_data = data['file_data']
+    receiver = data['receiver']
+
+   
 
     # Save the file to the server's file system
     file_path = os.path.join(upload_folder, file_name)
@@ -55,8 +55,11 @@ def handle_upload(data):
         with open(file_path, 'wb') as f:
             f.write(file_data)
 
+      
         # Emit the file information to the receiving client (file name)
-        socketio.emit('file_received', {'filename': file_name}, to=request.sid)
+        socketio.emit('file_received', {'filename': file_name},to=request.sid)
+        if users.check_status(receiver):
+            socketio.emit('file_received', {'filename': file_name},to=users.retrieve_sid(receiver))
     except Exception as e:
         print(f"Error during file upload: {e}")
         socketio.emit('file_error', {'message': 'File upload failed'}, to=request.sid)
@@ -68,10 +71,12 @@ def handle_download(data):
     file_name = data['filename']
     file_path = os.path.join(upload_folder, file_name)
     #session ID for specific user requesting the download
-    
+   
     if os.path.exists(file_path):
+        with open(file_path, 'rb') as f:
+            file_data = f.read() 
         # Send the file download event back to the requesting client
-        socketio.emit('file_download', {'filename': file_name}, to=request.sid)
+            socketio.emit('file_download', {'filename': file_name,'file_data': file_data}, to=request.sid)
     else:
         # If the file doesn't exist, notify the client
         socketio.emit('file_not_found', {'filename': file_name}, to=request.sid)
