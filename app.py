@@ -163,6 +163,9 @@ def send_log(data):
     sender = data.get('sender')
     receiver = data.get('receiver')
     logs = users.get_chat_log(sender,receiver)
+    for i in logs:
+        i=aes_helper.encrypt_aes(i,sender)
+    #ENCRYPTION AES
     socketio.emit('send_log',logs,to=request.sid)
 
 @socketio.on('send_aes')

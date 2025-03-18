@@ -25,7 +25,7 @@ function encrypt_aes(msg_dict) {
             msg_dict[key] = encrypted_value;
         }
     }
-    console.log(msg_dict);
+    
     return msg_dict;
 }
 
@@ -46,6 +46,6 @@ function decrypt_aes(msg_dict){
             msg_dict[key] = decrypted_value;
         }
     }
-    console.log(msg_dict)
+    
     return msg_dict;
 }

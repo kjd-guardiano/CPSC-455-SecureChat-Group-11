@@ -64,6 +64,9 @@ document.getElementById('receiver').addEventListener('change', function () {
 
    
 socket.on('send_log', function (data1) {
+    for (let i in data1){
+        data1[i] = decrypt_aes(data1[i]);
+    }
     
     data1.reverse().forEach(item => {
         if (item["0"] == name){

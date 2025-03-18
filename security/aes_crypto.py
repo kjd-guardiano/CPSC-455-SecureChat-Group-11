@@ -17,6 +17,7 @@ class aes_help:
 
     
     def encrypt_aes(self,msg_dict,name):
+        print('Encrypting: ',msg_dict)
         user_key = self.users_key[name]
         for key in msg_dict:
         
@@ -29,6 +30,7 @@ class aes_help:
 
     
     def decrypt_aes(self, msg_dict, name):
+        print('Decrypting: ',msg_dict)
         user_key = self.users_key[name]
         for key in msg_dict:
             encrypted_msg = base64.b64decode(msg_dict[key])
