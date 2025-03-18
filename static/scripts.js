@@ -7,11 +7,13 @@ socket.on('connect', function () {
 });
 
 socket.on('response', function (data) {
-    console.log('Server says: ' + data[0]);
-    var receiver1 = data[1];
+    decrypted_dict = decrypt_aes(data)
+    console.log('HIIIII',decrypted_dict)
+    console.log('Server says: ' + decrypted_dict[0]);
+    var receiver1 = decrypted_dict[1];
     if (receiver1 == global_receiver) {
     console.log(receiver1);
-    add_chat('receive',receiver1,data[0])
+    add_chat('receive',receiver1,decrypted_dict[0])
     }
 });
 
@@ -22,13 +24,14 @@ socket.on('response', function (data) {
 socket.on('login1', function (data) {
     if (data[0] === 1) {
         name = document.getElementById('username').value;
+        send_aes_key();
         headerToggle();
         // Display the username
         document.getElementById('userDisplay').innerText = 'Logged in as: ' + name;
         document.getElementById('messageContainer').style.display = 'block';
         document.getElementById('login_form').style.display = "none";
         document.getElementById('sign_up_form').style.display = "none";
-      
+        
     } else if (data[0] === -1) {
         console.log("Login failed");
     }

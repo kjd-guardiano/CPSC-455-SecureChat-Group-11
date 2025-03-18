@@ -20,3 +20,14 @@ class rsa_help:
             login_info_dict[key] = decrypted.decode('utf-8')
 
         return login_info_dict
+    
+    def decrypt_aes(self,key):
+        private_key = self.rsa_key
+        decryptor = PKCS1_v1_5.new(private_key)
+        
+
+        encrypted_aes_key = base64.b64decode(key)
+
+       
+        decrypted_aes_key = decryptor.decrypt(encrypted_aes_key,None)
+        return decrypted_aes_key

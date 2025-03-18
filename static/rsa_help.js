@@ -21,3 +21,12 @@ function encrypt_login(login_info_dict) {
     console.log(encrypted_dict)
     return encrypted_dict
 }   
+
+function encrypt_key(aes_key){
+    const encryptor = new JSEncrypt();
+    encryptor.setPublicKey(server_publickey);
+
+    const aesKeyBase64 = aes_key.toString(CryptoJS.enc.Base64);
+    const encryptedAESKey = encryptor.encrypt(aesKeyBase64);
+    return encryptedAESKey
+}

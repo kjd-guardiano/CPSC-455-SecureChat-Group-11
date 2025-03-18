@@ -49,7 +49,13 @@ class clients:
                 return client.login_limiter.allow_request()
         return False
 
-
+    def get_user(self, sid):
+        # Iterate over all clients and check for the matching pid (sid)
+        for username, client in self.clients_dict.items():
+            if client.pid == sid:
+                return username
+        return None  # If no user is found with that pid
+        
     def check_status(self,name):
         return self.clients_dict[name].online
 

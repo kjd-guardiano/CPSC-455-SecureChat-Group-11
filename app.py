@@ -5,7 +5,7 @@ from ftplib import FTP
 from flask_limiter.util import get_remote_address
 from contextlib import asynccontextmanager
 from ratelimits import *
-from security import rsa_crypto
+from security import rsa_crypto,aes_crypto
 import asyncio, math, time, authentication, clients, os
 
 app = Flask(__name__)
@@ -29,6 +29,7 @@ socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, enginei
 
 users = clients.clients()   #class that stores info on all clients
 rsa_helper = rsa_crypto.rsa_help()
+aes_helper = aes_crypto.aes_help()
 
 #for serving uploaded files on request
 @app.route('/uploads/<filename>')
@@ -148,8 +149,8 @@ def handle_message(data):
         else:
             users.store_chat(username,receiver,message)
             dict_message = {0:message1,1:username}
-            #TODO encrypt dict values
-            socketio.emit('response',dict_message , to =users.retrieve_sid(receiver))      #sends back the message as a single string
+            encrypted = aes_helper.encrypt_aes(dict_message,receiver)
+            socketio.emit('response',encrypted , to =users.retrieve_sid(receiver))      #sends back the message as a single string
   
 
 @socketio.on('chat_log')
@@ -159,10 +160,14 @@ def send_log(data):
     logs = users.get_chat_log(sender,receiver)
     socketio.emit('send_log',logs,to=request.sid)
 
+@socketio.on('send_aes')
+def receive_aes(data):
+    key = rsa_helper.decrypt_aes(data)
+    aes_helper.set_key(key,users.get_user(request.sid))
 
 @socketio.on('disconnect')
 def disconnect():
-    users.disconnect(request.sid)
+    key = users.disconnect(request.sid)
 
 if __name__ == '__main__':
   cert = ('security/securechat.crt','security/seckey.key')
