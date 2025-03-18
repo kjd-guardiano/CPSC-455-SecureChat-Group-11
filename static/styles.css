@@ -45,10 +45,7 @@ button {
 .logoutButton:active:not(disabled) {
     background: rgb(125, 125, 126);
 }
-.messageContainer{
-    display: flex;
-    flex-direction: column;
-}
+
 .sendMsgButton {
     position: fixed;
     right: 24px;
@@ -155,12 +152,15 @@ textarea {
 
 .emoji-container {
     display: none;
-    position: absolute;
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
     background-color: #f1f1f1;
     min-width: 160px;
-    overflow: auto;
     border: 1px solid #333;
-    z-index: 1;
+    z-index: 1000;
+    overflow: hidden; /* Prevents scrollbars from appearing */
 }
 
 .emoji-container .emoji {
@@ -207,4 +207,5 @@ textarea {
 .received-message .message-text {
     background-color: #dcdcdc; 
 }
+
 

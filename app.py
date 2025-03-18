@@ -175,7 +175,7 @@ def receive_aes(data):
 
 @socketio.on('disconnect')
 def disconnect():
-    key = users.disconnect(request.sid)
+    users.disconnect(request.sid)
 
 if __name__ == '__main__':
   cert = ('security/securechat.crt','security/seckey.key')
