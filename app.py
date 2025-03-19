@@ -44,8 +44,8 @@ def handle_upload(data):
     file_name = data['filename']
     file_data = data['file_data']
     receiver = data['receiver']
-
-   
+    decrypted_file = aes_helper.decrypt_file(file_data,users.get_user(request.sid))
+    
 
     # Save the file to the server's file system
     file_path = os.path.join(upload_folder, file_name)
@@ -53,7 +53,7 @@ def handle_upload(data):
     # Open the file and write the binary data to it
     try:
         with open(file_path, 'wb') as f:
-            f.write(file_data)
+            f.write(decrypted_file)
 
       
         # Emit the file information to the receiving client (file name)

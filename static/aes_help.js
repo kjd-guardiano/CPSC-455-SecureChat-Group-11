@@ -51,4 +51,28 @@ function decrypt_aes(msg_dict){
 }
 
 
+function decryptData(encryptedFileB64) {
+    // Decode the base64-encoded encrypted file using crypto-js
+    const encryptedData = CryptoJS.enc.Base64.parse(encryptedFileB64);  // Decode from Base64
+    const aesKey = server_aes_key;  // Assuming aesKey is available globally
 
+    // Decrypt the data using AES-ECB mode (no IV)
+    const decryptedData = CryptoJS.AES.decrypt(
+        { ciphertext: encryptedData },
+        aesKey,
+        { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
+    );
+
+    // Check if decryption was successful (decrypted data has byte length)
+    if (decryptedData.sigBytes > 0) {
+        // Convert the decrypted data into a byte array (Uint8Array)
+        const decryptedBytes = new Uint8Array(decryptedData.sigBytes);
+        for (let i = 0; i < decryptedData.sigBytes; i++) {
+            decryptedBytes[i] = decryptedData.words[i >>> 2] >>> (24 - (i % 4) * 8) & 0xff;
+        }
+
+        return decryptedBytes;  // Return the decrypted bytes as a Uint8Array
+    } else {
+        return null;  // Return null if decryption failed
+    }
+}

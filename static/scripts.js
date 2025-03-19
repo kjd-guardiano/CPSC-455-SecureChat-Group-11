@@ -97,21 +97,34 @@ function adjustHeight(el){
     el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "40px";
 }
 
-//for uploading
 function uploadFile() {
     const file = document.getElementById('fileInput').files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(event) {
-            const fileData = event.target.result;
-            if (global_receiver){
-            // Emit file upload to server (send binary data as ArrayBuffer)
-            socket.emit('upload_file', {
-                filename: file.name,
-                file_data: fileData,
-                receiver: global_receiver
+            const fileData = new Uint8Array(event.target.result); // Read as Uint8Array (binary data)
+
+            // Convert the ArrayBuffer to a CryptoJS WordArray
+            const wordArray = CryptoJS.lib.WordArray.create(fileData);
+
+            // Encrypt the file data using AES in ECB mode
+            const encryptedData = CryptoJS.AES.encrypt(wordArray, server_aes_key, {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
             });
-        }
+
+            // Convert the encrypted data to base64 string
+            const encryptedBase64 = encryptedData.toString(CryptoJS.format.Base64);
+
+            if (global_receiver) {
+                console.log(encryptedBase64)
+                // Emit the encrypted file to the server (send only encrypted data, not the key)
+                socket.emit('upload_file', {
+                    filename: file.name,
+                    file_data: encryptedBase64, // encrypted file data as base64 string
+                    receiver: global_receiver
+                });
+            }
         };
         reader.readAsArrayBuffer(file); // Read file as binary data
     }
@@ -158,32 +171,10 @@ socket.on('file_download', function(data) {
     const encryptedFile = data.file_data;  // Encrypted binary data
     const filename = data.filename;
     
-    // Call the decryption and download function
-    decryptAndDownload(encryptedFile,filename);
-});
+    // Call the decryption function
+    const decryptedBytes = decryptData(encryptedFile);  // Decrypt the data
 
-
-function decryptAndDownload(encryptedFileB64, filename) {
-    // Decode the base64-encoded encrypted file using crypto-js
-    const encryptedData = CryptoJS.enc.Base64.parse(encryptedFileB64);  // Decode from Base64
-
-    const aesKey = server_aes_key;
-
-    // Decrypt the data using AES-ECB mode (no IV)
-    const decryptedData = CryptoJS.AES.decrypt(
-        { ciphertext: encryptedData },
-        aesKey,
-        { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
-    );
-
-    // Check if decryption was successful (decrypted data has byte length)
-    if (decryptedData.sigBytes > 0) {
-        // Convert the decrypted data into a byte array (Uint8Array)
-        const decryptedBytes = new Uint8Array(decryptedData.sigBytes);
-        for (let i = 0; i < decryptedData.sigBytes; i++) {
-            decryptedBytes[i] = decryptedData.words[i >>> 2] >>> (24 - (i % 4) * 8) & 0xff;
-        }
-
+    if (decryptedBytes) {
         // Create a Blob from the decrypted bytes
         const blob = new Blob([decryptedBytes], { type: 'application/octet-stream' });
 
@@ -195,7 +186,8 @@ function decryptAndDownload(encryptedFileB64, filename) {
     } else {
         console.error('Decryption failed.');
     }
-}
+});
+
 
 
 
