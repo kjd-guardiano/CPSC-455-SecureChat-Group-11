@@ -50,11 +50,5 @@ function decrypt_aes(msg_dict){
     return msg_dict;
 }
 
-function decrypt_file(encrypted_file) {
-    // Decrypt the data
-    const bytes = CryptoJS.AES.decrypt(encrypted_file, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
 
-    // Convert the decrypted bytes back to a string
-    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-    return decrypted;
-}
+

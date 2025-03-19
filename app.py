@@ -75,8 +75,10 @@ def handle_download(data):
     if os.path.exists(file_path):
         with open(file_path, 'rb') as f:
             file_data = f.read() 
+            encrypted_file = aes_helper.encrypt_file(file_data,users.get_user(request.sid))
+           
         # Send the file download event back to the requesting client
-            socketio.emit('file_download', {'filename': file_name,'file_data': file_data}, to=request.sid)
+            socketio.emit('file_download', {'filename': file_name,'file_data': encrypted_file}, to=request.sid)
     else:
         # If the file doesn't exist, notify the client
         socketio.emit('file_not_found', {'filename': file_name}, to=request.sid)

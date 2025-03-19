@@ -135,20 +135,7 @@ function downloadFile() {
     // Emit request to download the file from server
     socket.emit('download_file', { filename:filename });
 
-    // Listen for the file download information
-    socket.on('file_download', function(data) {
-        const fileData = data.file_data;  // Binary data of the file
-        const filename = data.filename;   // Filename
-    
-        // Create a Blob from the binary data
-        const blob = new Blob([new Uint8Array(fileData)], { type: 'application/octet-stream' });
-    
-        // Create a link to trigger the download
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;  // The downloaded file will have this name
-        link.click();  // Simulate the click to start downloading
-    });
+   
 
     // Listen for file not found
     socket.on('file_not_found', function(data) {
@@ -161,3 +148,54 @@ function addFileToList(filename) {
     li.textContent = filename;
     document.getElementById('fileList').appendChild(li);
 }
+
+
+
+
+// Example usage: Assuming `data.file_data` is the base64-encoded encrypted file data and `data.filename` is the file name.
+socket.on('file_download', function(data) {
+    console.log("Received encrypted data:", data.file_data);
+    const encryptedFile = data.file_data;  // Encrypted binary data
+    const filename = data.filename;
+    
+    // Call the decryption and download function
+    decryptAndDownload(encryptedFile,filename);
+});
+
+
+function decryptAndDownload(encryptedFileB64, filename) {
+    // Decode the base64-encoded encrypted file using crypto-js
+    const encryptedData = CryptoJS.enc.Base64.parse(encryptedFileB64);  // Decode from Base64
+
+    const aesKey = server_aes_key;
+
+    // Decrypt the data using AES-ECB mode (no IV)
+    const decryptedData = CryptoJS.AES.decrypt(
+        { ciphertext: encryptedData },
+        aesKey,
+        { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
+    );
+
+    // Check if decryption was successful (decrypted data has byte length)
+    if (decryptedData.sigBytes > 0) {
+        // Convert the decrypted data into a byte array (Uint8Array)
+        const decryptedBytes = new Uint8Array(decryptedData.sigBytes);
+        for (let i = 0; i < decryptedData.sigBytes; i++) {
+            decryptedBytes[i] = decryptedData.words[i >>> 2] >>> (24 - (i % 4) * 8) & 0xff;
+        }
+
+        // Create a Blob from the decrypted bytes
+        const blob = new Blob([decryptedBytes], { type: 'application/octet-stream' });
+
+        // Create a download link and trigger the download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;  // Specify the desired file name here
+        link.click();  // Trigger the download
+    } else {
+        console.error('Decryption failed.');
+    }
+}
+
+
+

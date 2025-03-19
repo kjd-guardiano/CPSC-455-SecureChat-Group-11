@@ -2,7 +2,7 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Random import get_random_bytes
 import base64
-import io
+import os
 
 class aes_help:
     def __init__(self):
@@ -38,20 +38,21 @@ class aes_help:
             msg_dict[key] = decrypted_msg.decode('utf-8')
         
         return msg_dict
-    
-    def encrypt_file(self,file,name):
-        plaintext = file.read()
-        cipher = AES.new(self.users_key[name], AES.MODE_CBC)
-
-        # Pad plaintext to be a multiple of 16 bytes
-        ciphertext = cipher.encrypt(pad(plaintext, AES.block_size))
-
-        # Store the IV and the ciphertext in a memory buffer (simulating a file)
-        encrypted_data = io.BytesIO()
-        encrypted_data.write(cipher.iv)  # Write the IV first
-        encrypted_data.write(ciphertext)  # Then the encrypted content
         
-        # Move back to the beginning of the "file" in memory for reading
-        encrypted_data.seek(0)
+    def encrypt_file(self, file_data, name):
+        # Decode the base64-encoded AES key
+        aes_key = self.users_key[name]
         
-        return encrypted_data
+        # Set up the AES cipher in ECB mode (no IV needed)
+        cipher = AES.new(aes_key, AES.MODE_ECB)
+        
+        # Pad the file data to make it a multiple of AES.block_size
+        padded_data = pad(file_data, AES.block_size)
+        
+        # Encrypt the data
+        encrypted_data = cipher.encrypt(padded_data)
+        
+        # Base64 encode the encrypted data to make it ready for transmission
+        encrypted_file_b64 = base64.b64encode(encrypted_data).decode('utf-8')
+        
+        return encrypted_file_b64
