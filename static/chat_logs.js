@@ -91,13 +91,13 @@ function add_chat(type,receiver, message, position) {
         var messageDisplay = chatWindow.querySelector('.message-display');
         
         // Create message container div
-        var messageElement = document.createElement('div');
+        var messageElement = document.createElement('text');
         messageElement.classList.add('message');
 
         // Create message text element
-        var messageText = document.createElement('div');
+        var messageText = document.createElement('text');
         messageText.classList.add('message-text');
-        messageText.textContent = message;
+        messageText.innerHTML = formatText(message);
 
         // Check if the message is sent by the user or received
         if (type === 'send') {  // Sent message

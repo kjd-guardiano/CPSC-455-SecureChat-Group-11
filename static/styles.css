@@ -3,7 +3,7 @@ html {
 }
 
 body {
-    font-family: monospace;
+    font-family: sans-serif;
 }
 
 title {
@@ -208,4 +208,14 @@ textarea {
     background-color: #dcdcdc; 
 }
 
+.italic {
+    font-style: italic;
+}
 
+.bold {
+    font-weight: bold;
+}
+
+.underline {
+    text-decoration: underline;
+}

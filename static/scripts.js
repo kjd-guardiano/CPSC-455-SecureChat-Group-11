@@ -162,9 +162,6 @@ function addFileToList(filename) {
     document.getElementById('fileList').appendChild(li);
 }
 
-
-
-
 // Example usage: Assuming `data.file_data` is the base64-encoded encrypted file data and `data.filename` is the file name.
 socket.on('file_download', function(data) {
     console.log("Received encrypted data:", data.file_data);
@@ -188,6 +185,13 @@ socket.on('file_download', function(data) {
     }
 });
 
-
-
-
+// formatting
+function formatText(text) {
+    //bold
+    text = text.replace(/\*\*(.*?)\*\*/g, '<span class="bold">$1</span>');
+    //italics
+    text = text.replace(/\*(.*?)\*/g, '<span class="italic">$1</span>');
+    //underline
+    text = text.replace(/_(.*?)_/g, '<span class="underline">$1</span>');
+    return text;
+}
