@@ -8,7 +8,6 @@ socket.on('connect', function () {
 
 socket.on('response', function (data) {
     decrypted_dict = decrypt_aes(data)
-    console.log('HIIIII',decrypted_dict)
     console.log('Server says: ' + decrypted_dict[0]);
     var receiver1 = decrypted_dict[1];
     if (receiver1 == global_receiver) {

@@ -2,8 +2,6 @@ let server_aes_key
 
 function send_aes_key() {
     const passphrase = CryptoJS.lib.WordArray.random(256 / 8); // Generate a 256-bit key
-    console.log(passphrase)
-    console.log("Generated AES Key:", passphrase.toString(CryptoJS.enc.Base64));
     server_aes_key= passphrase
     encrypted_key = encrypt_key(passphrase)
     socket.emit('send_aes',encrypted_key)
