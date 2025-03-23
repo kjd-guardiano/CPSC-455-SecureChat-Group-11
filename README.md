@@ -19,7 +19,7 @@ Users can now add emojis to their messages from a pre-determined list located on
 All connections occur via WebSocket Secure over HTTPS.
 
 ### User Authentication
-Basic authentication occurs via a username and password. Passwords are not stored on the server. In order to create an account, enter a username and password to the Sign Up form at the bottom of the landing page and click the sign-up button. From there, you can use the same login combination to log in. Protections for authentication also exist, such as brute force protection, end-to-end encryption, and chat logs that can be reviewed.
+Basic authentication occurs via a username and password. Passwords are not stored on the server. In order to create an account, enter a username and password to the Sign Up form at the bottom of the landing page and click the sign-up button. From there, you can use the same login combination to log in. Protections for authentication also exist, such as brute force protection, end-to-end encryption, and chat logs that can be reviewed. Passwords are also stored on the server through hashing + salting, for security.
 
 ### Rate Limiting
 Rate-limiting occurs both for initial connections (accessing the server) and messaging. Messages are not sent to their target destination when rate-limiting is enabled, shown on both console and as a message directly to the rate-limited user.
