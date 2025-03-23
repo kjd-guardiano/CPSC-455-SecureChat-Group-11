@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = 'dummy_secret_key'
 #rate limiting link access default settings
 access_limiter = Limiter(get_remote_address,
                          app=app,
-                         default_limits=['200 per day', '20 per hour'],
+                         default_limits=['10 per minute'],
                          storage_uri="memory://")
 
 
