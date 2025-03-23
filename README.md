@@ -29,6 +29,11 @@ Joining and disconnecting are handled via the opening/closing of the web browser
 
 ##  Usage
 To run the server application, open your terminal of choice (Terminal, Command Prompt, etc.) and navigate to the folder containing the application on the terminal. Then, run it as a Python application (**python3 app.py**, **python app.py**). The terminal will provide feedback that the server is active, and provide a HTTPS link for both localhost and LAN. In order to communicate between multiple devices, utilize the second LAN link provided by the terminal.
+If you are using a Windows device and the server is only providing localhost, run the following commands:
+**set FLASK_APP=app.py**
+**set FLASK_RUN_HOST=0.0.0.0**
+**flask run**
+The server should then start as normal.
 
 In the event you do not have the Python dependencies to run the application, use the command **pip install -r requirements.txt** to download the necessary libraries.
 
