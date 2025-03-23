@@ -25,7 +25,7 @@ if not os.path.exists(upload_folder):
     os.makedirs(upload_folder)
 
 #socket setup
-socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True)
+socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True,async_mode='threading')
 
 users = clients.clients()   #class that stores info on all clients
 rsa_helper = rsa_crypto.rsa_help()
