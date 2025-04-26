@@ -16,8 +16,19 @@ socket.on('response', function (data) {
     }
 });
 
+//VT scan status return function
+socket.on('scan_status', (data) => {
+    if (data.status === 'unsafe') {
+        alert(`File flagged as unsafe: ${data.malicious} malicious reports found.`);
+    }
+    else if (data.status === 'too_large') {
+        alert(`This file is too large.`);
+    }
+    else if (data.status === 'scan_failed') {
+        alert(`Upload failed, please try again.`);
+    }
 
-
+});
 
 //recieves the success or failure of login attempt
 socket.on('login1', function (data) {

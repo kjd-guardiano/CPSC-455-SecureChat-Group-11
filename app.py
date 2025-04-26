@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, current_app
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
 from ftplib import FTP
@@ -6,7 +6,10 @@ from flask_limiter.util import get_remote_address
 from contextlib import asynccontextmanager
 from ratelimits import *
 from security import rsa_crypto,aes_crypto
-import asyncio, math, time, authentication, clients, os
+from eventlet import wsgi
+from dotenv import load_dotenv
+import asyncio, math, time, authentication, clients, os, hashlib, requests, eventlet, eventlet.wsgi, ssl
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
@@ -18,6 +21,12 @@ access_limiter = Limiter(get_remote_address,
                          storage_uri="memory://")
 
 
+load_dotenv()
+
+#set-up for VirusTotal API
+app.config['VT_API_KEY'] = os.getenv("VT_API_KEY")
+app.config['VT_BASE_URL'] = os.getenv("VT_BASE_URL")
+
 #Directory for file storage
 upload_folder = './SecureChat_Upload'
 #Directory check, creating new folder if the previously specified does not exist.
@@ -25,13 +34,66 @@ if not os.path.exists(upload_folder):
     os.makedirs(upload_folder)
 
 #socket setup
-socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True)
+socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True,async_mode='eventlet')
 
 users = clients.clients()   #class that stores info on all clients
 rsa_helper = rsa_crypto.rsa_help()
 aes_helper = aes_crypto.aes_help()
 
+#for scanning via VirusTotal
+def virus_scan(file_bytes):
+    # NOTE: VirusTotal's free plan only accepts file sizes up to 32 MB.
+    if len(file_bytes) > 32 * 1024 * 1024:
+        socketio.emit('scan_status', {
+            'filename': file_bytes['filename'],
+            'status': 'too_large',
+            'message': 'File exceeds maximum size.'
+        }, to=request.sid)
+        return
 
+    api_key = current_app.config['VT_API_KEY']
+    # setup for upload
+    file = {'file': ('file.bin', file_bytes)}
+    hash = hashlib.sha256(file_bytes).hexdigest()
+    url = f"https://www.virustotal.com/api/v3/files/{hash}"
+    headers = {"x-apikey" : api_key}
+
+    # check hash if already scanned first, return results
+    response = requests.get(url, headers=headers)
+
+    # if hash is successful, return hashed report results
+    if response.status_code == 200:
+        vt_data = response.json()
+        stats = vt_data["data"]["attributes"]["last_analysis_stats"]
+        mal = stats.get("malicious", 0)
+        sus = stats.get("suspicious", 0)
+        return mal, sus
+
+    # continues if hash is unsuccessful, moves onto scanning
+    response = requests.post("https://www.virustotal.com/api/v3/files", files=file, headers=headers)
+
+    if response.status_code != 200:
+        return None, None, "Failed to upload."
+    
+    # start of polling for report return
+    analysis_id = response.json()["data"]["id"]
+    analysis_url = f"https://www.virustotal.com/api/v3/analyses/{analysis_id}"
+    for _ in range(10):
+        time.sleep(3)
+        result_response = requests.get(analysis_url, headers=headers)
+        if result_response.status_code == 200:
+            result_data = result_response.json()
+            status = result_data["data"]["attributes"]["status"]
+            if status == "completed":
+                stats = result_data["data"]["attributes"]["stats"]
+                mal = stats.get("malicious", 0)
+                sus = stats.get("suspicious", 0)
+                return mal, sus, None
+        else:
+            # in event of error, exit loop
+            break
+
+    return None, None, "Request timed out."
 
 @app.route('/') 
 def index():
@@ -75,6 +137,31 @@ def handle_download(data):
     if os.path.exists(file_path):
         with open(file_path, 'rb') as f:
             file_data = f.read() 
+
+            # checking file hash for possible suspicious activity
+            mal, sus = virus_scan(file_data)
+            # if not prev found on VT (mal and sus return None)
+            if mal is None and sus is None:
+                mal, sus, error = virus_scan(file_data)
+                if error:
+                    socketio.emit('scan_status', {
+                        'filename': file_name,
+                        'status': 'scan_failed',
+                        'message': error
+                    }, to=request.sid)
+                    return
+            # some hits found
+            if mal > 0 or sus > 0:
+                socketio.emit('scan_status', {
+                    'filename': file_name,
+                    'status': 'unsafe',
+                    'malicious': mal,
+                    'suspicious': sus,
+                    'message': 'Download blocked: Potential malware detected'
+                }, to=request.sid)
+                return
+
+            # found clean by VT
             encrypted_file = aes_helper.encrypt_file(file_data,users.get_user(request.sid))
            
         # Send the file download event back to the requesting client
@@ -185,5 +272,11 @@ def disconnect():
     users.disconnect(request.sid)
 
 if __name__ == '__main__':
-  cert = ('security/securechat.crt','security/seckey.key')
-  socketio.run(app, debug=True, ssl_context=cert, host='0.0.0.0')
+  cert = 'security/securechat.crt'
+  key = 'security/seckey.key'
+
+  # wrapping for ssl
+  listener = eventlet.listen(('0.0.0.0', 5000))
+  ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
+
+  wsgi.server(ssl_listener, app)
