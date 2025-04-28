@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch()
 from flask import Flask, render_template, request, send_from_directory, current_app
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
@@ -8,9 +10,7 @@ from ratelimits import *
 from security import rsa_crypto,aes_crypto
 from eventlet import wsgi
 from dotenv import load_dotenv
-import asyncio, math, time, authentication, clients, os, hashlib, requests, eventlet, eventlet.wsgi, ssl
-
-eventlet.monkey_patch()
+import asyncio, math, time, authentication, clients, os, hashlib, requests, eventlet.wsgi, ssl
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
@@ -20,7 +20,6 @@ access_limiter = Limiter(get_remote_address,
                          app=app,
                          default_limits=['200 per day', '20 per hour'],
                          storage_uri="memory://")
-
 
 load_dotenv()
 
@@ -275,12 +274,12 @@ def disconnect():
 # changed for new upload method, old version below kept for posterity
 # Render (hosting site) manages HTTPS/SSL automatically, below will conflict otherwise
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
-#  cert = 'security/securechat.crt'
-#  key = 'security/seckey.key'
+#    socketio.run(app, host='0.0.0.0', port=5000)
+  cert = 'security/securechat.crt'
+  key = 'security/seckey.key'
 
   # wrapping for ssl
-#  listener = eventlet.listen(('0.0.0.0', 5000))
-#  ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
+  listener = eventlet.listen(('0.0.0.0', 5000))
+  ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
 
-#  wsgi.server(ssl_listener, app)
+  wsgi.server(ssl_listener, app)
