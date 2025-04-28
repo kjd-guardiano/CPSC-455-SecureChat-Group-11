@@ -10,6 +10,7 @@ from eventlet import wsgi
 from dotenv import load_dotenv
 import asyncio, math, time, authentication, clients, os, hashlib, requests, eventlet, eventlet.wsgi, ssl
 
+eventlet.monkey_patch()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
@@ -274,7 +275,7 @@ def disconnect():
 # changed for new upload method, old version below kept for posterity
 # Render (hosting site) manages HTTPS/SSL automatically, below will conflict otherwise
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT, 5000')))
+    socketio.run(app, host='0.0.0.0', port=5000)
 #  cert = 'security/securechat.crt'
 #  key = 'security/seckey.key'
 
