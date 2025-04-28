@@ -271,12 +271,15 @@ def receive_aes(data):
 def disconnect():
     users.disconnect(request.sid)
 
+# changed for new upload method, old version below kept for posterity
+# Render (hosting site) manages HTTPS/SSL automatically, below will conflict otherwise
 if __name__ == '__main__':
-  cert = 'security/securechat.crt'
-  key = 'security/seckey.key'
+    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT, 5000')))
+#  cert = 'security/securechat.crt'
+#  key = 'security/seckey.key'
 
   # wrapping for ssl
-  listener = eventlet.listen(('0.0.0.0', 5000))
-  ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
+#  listener = eventlet.listen(('0.0.0.0', 5000))
+#  ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
 
-  wsgi.server(ssl_listener, app)
+#  wsgi.server(ssl_listener, app)
