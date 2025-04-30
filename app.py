@@ -234,6 +234,7 @@ def handle_message(data):
             print(message1)
             
         if not users.check_status(receiver):
+            users.store_chat(username,receiver,message)
             error_msg = f"{receiver} is not online"
             dict_error_msg = {0:error_msg,1:receiver}
             encrypted = aes_helper.encrypt_aes(dict_error_msg,username)
@@ -262,6 +263,12 @@ def send_log(data):
 def receive_aes(data):
     key = rsa_helper.decrypt_aes(data)
     aes_helper.set_key(key,users.get_user(request.sid))
+
+
+@socketio.on('is-online')
+def is_online(data):
+    x = users.check_status(data.get('receiver'))
+    print('user is online', x)
 
 @socketio.on('disconnect')
 def disconnect():

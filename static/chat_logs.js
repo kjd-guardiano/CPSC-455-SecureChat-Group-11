@@ -3,6 +3,7 @@ received_log = [];
 global_receiver = ''
 
 socket.on('send_user_list', function (data) {
+    
     var users = Object.values(data);
     var receiverSelect = document.getElementById('receiver');
 
@@ -46,6 +47,24 @@ socket.on('send_user_list', function (data) {
 document.getElementById('receiver').addEventListener('change', function () {
     
     var selectedReceiver = this.value;
+    
+    document.getElementById('receiver-window1').textContent = 'Chat with: ' + selectedReceiver
+    
+    socket.emit('is-online',{sender: name, receiver : selectedReceiver})
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     global_receiver = selectedReceiver;
     if (!received_log.includes(selectedReceiver)){
         
@@ -145,12 +164,6 @@ function createChatWindow(user) {
     var chatWindow = document.createElement('div');
     chatWindow.classList.add('chat-window');
     chatWindow.id = 'chat-window-' + user;  // Unique ID for each chat window
-
-    // Create a title for the chat window
-    var chatTitle = document.createElement('div');
-    chatTitle.classList.add('chat-title');
-    chatTitle.textContent = "Chat with " + user;
-    chatWindow.appendChild(chatTitle);
 
     // Create a message display area
     var messageDisplay = document.createElement('div');

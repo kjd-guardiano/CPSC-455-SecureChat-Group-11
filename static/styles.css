@@ -47,8 +47,8 @@ button {
 }
 
 button:hover {
-    background-color: #3498db;
-    border-color: #2980b9;
+    background-color: #7e41ef78;
+    border-color: #9d00ff;
 }
 
 .logoutButton {
@@ -68,9 +68,7 @@ button:hover {
     padding: 10px;
 }
 
-.logoutButton:hover:not(disabled) {
-    background: linear-gradient(92.83deg, #3498db 0%, #2980b9 100%);
-}
+
 
 .logoutButton:active:not(disabled) {
     background: #2980b9;
@@ -90,9 +88,7 @@ button:hover {
     transition: all 0.3s ease;
 }
 
-.formButton:hover:not(disabled) {
-    background: linear-gradient(92.83deg, #3498db 0%, #2980b9 100%);
-}
+
 
 .formButton:active:not(disabled) {
     background: #2980b9;
@@ -194,6 +190,7 @@ textarea {
     width: 90%;
 }
 
+
 .emoji-container {
     display: none;
     position: fixed;
@@ -214,10 +211,7 @@ textarea {
     transition: all 0.2s ease;
 }
 
-.emoji-container .emoji:hover {
-    background-color: #3435db;
-    color: white;
-}
+
 
 .message {
     display: flex;
@@ -266,4 +260,12 @@ textarea {
     background-color: #222227;
     padding: 10px;
     border-radius: 10px;
+}
+
+.receiver-window1 {
+    font-size: 1.5rem; /* Or use 'xx-large', '24px', etc. */
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #9781ff; /* Discord blurple */
+    font-weight: 600;
+   
 }
