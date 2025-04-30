@@ -211,11 +211,7 @@ def authenticate(login_info):
                 users.set_status(username, request.sid)                      #using class now
                 dict_login_sucess = {0:login_sucess}
                 #TODO encrypt dict values
-            socketio.emit('login1',dict_login_sucess,to=request.sid)
-        else:
-            print("Please check your username or try again later.")
-    else:
-        print("No username provided!")
+    socketio.emit('login1',dict_login_sucess,to=request.sid)
 
 
 @socketio.on('message')

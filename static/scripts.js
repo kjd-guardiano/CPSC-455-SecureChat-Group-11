@@ -1,4 +1,5 @@
 var socket = io.connect('wss://' + document.domain + ':' + location.port);
+
 var name = '';
 chatters = [];
 
@@ -42,11 +43,45 @@ socket.on('login1', function (data) {
         document.getElementById('login_form').style.display = "none";
         document.getElementById('sign_up_form').style.display = "none";
         
-    } else if (data[0] === -1) {
+    }  else if (data[0] === -1) {
+        const el = document.getElementById('log_in_text');
+    
+        // Check if error message already exists
+        if (!document.getElementById('login-error')) {
+            const errorSpan = document.createElement('span');
+            errorSpan.id = 'login-error';
+            errorSpan.style.color = 'red';
+            errorSpan.style.fontSize = 'smaller';
+            errorSpan.textContent = ' - Login invalid';
+    
+            el.appendChild(errorSpan);
+    
+            setTimeout(() => {
+                errorSpan.remove();
+            }, 5000);
+        }
+    
         console.log("Login failed");
     }
 });
 
+socket.on('signup', function (data) {
+    const el = document.getElementById('sign_up_text'); // Make sure this element exists
+
+    // Remove old message if it's still there
+    const oldMsg = document.getElementById('signup-msg');
+    if (oldMsg) oldMsg.remove();
+
+    let color = data[0] === 1 ? 'lightgreen' : 'red';
+    let message = data[0] === 1 ? '- Signup successful' : '- Username taken';
+
+    el.innerHTML += ` <span id="signup-msg" style="color:${color}; font-size:smaller;">${message}</span>`;
+
+    setTimeout(() => {
+        const msg = document.getElementById('signup-msg');
+        if (msg) msg.remove();
+    }, 5000);
+});
 
 function sendMessage() {
     var message = document.getElementById('message').value;
