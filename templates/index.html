@@ -1,8 +1,3 @@
-
-
-
-
-
 <!DOCTYPE html>
 <html>
 
@@ -13,8 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
     <script src="https://cdn.rawgit.com/travist/jsencrypt/master/bin/jsencrypt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
-
-
 
 
 </head>
@@ -57,17 +50,16 @@
             <select id="receiver">
             </select>
         </div>
+<div class ="spacer1"> 
 
-
-        <div id="receivedHeader">
+        <div id="receivedHeader" style="width: 70%;">
             
 
         </div>
         <textarea type="text" placeholder="Type your message here! (max. 2000 characters)" maxlength="2000"
             class="emoji-input" id="message" placeholder="Type a message" onkeyup="adjustHeight(this)"></textarea>
         <div  class="emoji-container"></div>
-        <button id="sendMsg" class="sendMsgButton" type="button" onclick="sendMessage()">Send</button><br><br>
-
+        
 
 
 
@@ -79,28 +71,29 @@
             input.addEventListener("keypress", function (event) {
                 if (event.key === "Enter") {
                     event.preventDefault();
-                    document.getElementById("sendMsg").click();
+                    sendMessage();
                 }
             });
         </script>
 
 
-        <div>Upload a File
+        <div class="file-upload">Upload a File <br> 
             <input type="file" id="fileInput">
+            <br> <br>
             <button onclick="uploadFile()">Upload</button>
             <br> <br>
-            Download a File
+            Download a File <br> 
             <input type="text" id="filenameInput" placeholder="Enter filename to download">
-
-            <button onclick="downloadFile()">Download</button>
             <br> <br>
-            Uploaded Files
+            <button onclick="downloadFile()">Download</button>
+            <br> <br> 
+            Uploaded Files:
             <ul id="fileList"></ul>
 
         </div>
 
     </div>
-
+</div>
    
 
     <script src="static/scripts.js"></script>
