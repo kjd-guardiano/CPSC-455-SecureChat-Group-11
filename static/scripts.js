@@ -103,6 +103,7 @@ function sendMessage() {
 
 
 function sign_up() {
+    generatePublicPart();
     event.preventDefault();
     var username = document.getElementById('Sign_up_username').value;
     var password = document.getElementById('Sign_up_password').value;
