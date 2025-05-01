@@ -277,7 +277,6 @@ def disconnect():
 # changed for new upload method, old version below kept for posterity
 # Render (hosting site) manages HTTPS/SSL automatically, below will conflict otherwise
 if __name__ == '__main__':
-  app.debug = True  
 #    socketio.run(app, host='0.0.0.0', port=5000)
   cert = 'security/securechat.crt'
   key = 'security/seckey.key'
