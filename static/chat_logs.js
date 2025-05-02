@@ -52,19 +52,6 @@ document.getElementById('receiver').addEventListener('change', function () {
     
     socket.emit('is-online',{sender: name, receiver : selectedReceiver})
 
-
-
-
-
-
-
-
-
-
-
-
-
-    
     global_receiver = selectedReceiver;
     if (!received_log.includes(selectedReceiver)){
         
