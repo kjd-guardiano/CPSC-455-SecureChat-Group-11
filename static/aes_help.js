@@ -8,6 +8,7 @@ function send_aes_key() {
 }
 
 function encrypt_aes_string(plain_text, aes_encryption_key) {
+   
     const iv = CryptoJS.lib.WordArray.random(16);  // 128-bit IV
 
     const encrypted = CryptoJS.AES.encrypt(plain_text, aes_encryption_key, {
@@ -22,6 +23,7 @@ function encrypt_aes_string(plain_text, aes_encryption_key) {
 
 
 function decrypt_aes_string(encrypted_string, aes_decryption_key) {
+   
     const parts = encrypted_string.split(':');
     if (parts.length !== 2) {
         console.error("Invalid encrypted format (expected iv:ciphertext)");

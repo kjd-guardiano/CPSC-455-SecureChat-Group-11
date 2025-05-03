@@ -66,35 +66,38 @@ socket.on('online_check', function (data1) {
 });
 
 
-document.getElementById('receiver').addEventListener('change', function () {
-     
-    var selectedReceiver = this.value;
-    if (!(selectedReceiver in send_receiver_shared_key)){
-        send_receiver_shared_key[selectedReceiver]= deriveSharedAESKey(name,user_pass11,selectedReceiver)
+document.getElementById('receiver').addEventListener('change', async function () {
+    const selectedReceiver = this.value;
+
+    if (!(selectedReceiver in send_receiver_shared_key)) {
+        try {
+            send_receiver_shared_key[selectedReceiver] = await deriveSharedAESKey(name, user_pass11, selectedReceiver);
+        } catch (err) {
+            console.error("Error deriving AES key:", err.message);
+            return; // Stop if key derivation fails
+        }
     }
 
     const nameEl = document.getElementById('receiver-name');
     nameEl.textContent = selectedReceiver;
     global_receiver = selectedReceiver;
-    socket.emit('is-online', { sender: name, receiver: selectedReceiver });
-    
-   
-    
 
-    if (!received_log.includes(selectedReceiver)){
-        
-        received_log.push(selectedReceiver)
-        console.log(received_log)
-        console.log(selectedReceiver)
-        socket.emit('chat_log',{sender: name, receiver : selectedReceiver})
+    socket.emit('is-online', { sender: name, receiver: selectedReceiver });
+
+    if (!received_log.includes(selectedReceiver)) {
+        received_log.push(selectedReceiver);
+        console.log(received_log);
+        console.log(selectedReceiver);
+        socket.emit('chat_log', { sender: name, receiver: selectedReceiver });
     }
-    
+
     // Hide all chat windows
     hideAllChatWindows();
-    
+
     // Show the chat window of the selected receiver
     showChatWindow(selectedReceiver);
 });
+
 
    
 socket.on('send_log', function (data1) {

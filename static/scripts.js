@@ -116,9 +116,10 @@ function sendMessage() {
     chat_window_msg = 'you: ' + message
    add_chat('send',receiver,chat_window_msg)
 
-
+   
     // Create message dictionary and emit it to the server
     dict_message = {
+        
         message: encrypt_aes_string(message, send_receiver_shared_key[global_receiver]),
         user: name,
         receiver: receiver
