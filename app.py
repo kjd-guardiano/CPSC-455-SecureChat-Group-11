@@ -211,6 +211,7 @@ def authenticate(login_info):
                 users.set_status(username, request.sid)                      #using class now
                 dict_login_sucess = {0:login_sucess}
                 #TODO encrypt dict values
+                socketio.emit('online_check',{'online': True,'receiver': username})
     socketio.emit('login1',dict_login_sucess,to=request.sid)
 
 
