@@ -194,19 +194,29 @@ textarea {
 .emoji-container {
     display: none;
     position: fixed;
-    top: 50%;
-    right: 0;
+    top: 65%;
+    right: 145px; 
     transform: translateY(-50%);
-    background-color: #333;
-    min-width: 160px;
-    border: 1px solid #444;
+    background-color: #4949d3ea;
+    border: 1px solid #000000;
     z-index: 1000;
     overflow: hidden;
     border-radius: 6px;
+    padding: 6px;
+    grid-template-columns: repeat(4, 1fr); /* 3 columns */
+    gap: 6px;
+
+    max-height: 400px; /* Limit height */
+    overflow-y: auto; /* Enable scroll if content is taller */
+    scrollbar-width: thin;        /* Firefox */
+    -ms-overflow-style: none;   
 }
 
+
+
 .emoji-container .emoji {
-    padding: 10px;
+    font-size: larger;
+    padding: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -269,3 +279,4 @@ textarea {
     font-weight: 600;
    
 }
+

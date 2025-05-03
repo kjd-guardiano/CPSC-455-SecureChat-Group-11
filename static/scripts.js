@@ -23,7 +23,8 @@ socket.on('response', function (data) {
             send_receiver_shared_key[sender]= deriveSharedAESKey(name,user_pass11,sender)
         }
          message = decrypt_aes_string(message, send_receiver_shared_key[sender]);
-        add_chat('receive', sender, message);
+         message1 = sender + ": " + message
+        add_chat('receive', sender, message1);
     }
    else{
         add_chat('receive', sender, message, 0, true);
