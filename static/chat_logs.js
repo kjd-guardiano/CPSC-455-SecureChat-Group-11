@@ -42,12 +42,14 @@ socket.on('send_user_list', function (data) {
 
 
 socket.on('online_check', function (data1) {
+
+    if (global_receiver === data1['receiver']){
     const nameEl = document.getElementById('receiver-name');
     const statusEl = document.getElementById('receiver-status');
     const containerEl = document.querySelector('.receiver-window1'); // <-- fixed
 
     nameEl.textContent = data1['receiver'];
-
+  
     if (!data1['online']) {
         statusEl.textContent = ' – Offline';
         statusEl.style.fontSize = '0.9rem';
@@ -60,7 +62,7 @@ socket.on('online_check', function (data1) {
         statusEl.style.color = '#7CFC00';
         containerEl.style.opacity = '1';
         containerEl.style.boxShadow = '0 4px 10px rgba(121, 121, 121, 0.18)';
-    }
+    }}
 });
 
 
