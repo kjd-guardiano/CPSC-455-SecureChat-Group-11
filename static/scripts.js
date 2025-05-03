@@ -9,20 +9,20 @@ socket.on('connect', function () {
 });
 
 socket.on('response', function (data) {
-    const encryptedMessage = data[0];
+    
+    const type = data[0]
+    var message = data[2];
     const sender = data[1];
 
-    if (!(sender in send_receiver_shared_key)){
-        send_receiver_shared_key[sender]= deriveSharedAESKey(name,user_pass11,sender)
+    if (type === "encrypted"){
+        if (!(sender in send_receiver_shared_key)){
+            send_receiver_shared_key[sender]= deriveSharedAESKey(name,user_pass11,sender)
+        }
+         message = decrypt_aes_string(message, send_receiver_shared_key[sender]);
     }
-
-
-
-    // Decrypt only the message (data[0])
-    const decryptedMessage = decrypt_aes_string(encryptedMessage, send_receiver_shared_key[sender]);
-
+   
     if (sender === global_receiver) {
-        add_chat('receive', sender, decryptedMessage);
+        add_chat('receive', sender, message);
     }
 });
 

@@ -216,34 +216,36 @@ def authenticate(login_info):
 
 @socketio.on('message')
 def handle_message(data):
-    print('DHJSKBVSHJDVSKHGDJVSKHDGVSDKHGSDV',data)
-    #DECRYPTION AES
     username = data.get('user')
     receiver = data.get('receiver')
-    
+    message = data.get('message')
+
     if not users.check_limits(username, "msg"):
-         dict_rate_error = {0:"Rate-limited! You need to slow down!",1:receiver}
-      
-        
-         socketio.emit('response',dict_rate_error , to=request.sid)
-    else:
+        rate_limit_msg = {
+            0: "error",
+            1: receiver,
+            2: "Rate-limited! You need to slow down!"
+        }
+        socketio.emit('response', rate_limit_msg, to=request.sid)
+        return
 
-        message = data.get('message')    #sets message from dictionary
-      
-            
-        if not users.check_status(receiver):
-            users.store_chat(username,receiver,message)
-            error_msg = f"{receiver} is not online"
-            dict_error_msg = {0:error_msg,1:receiver}
-           
-            socketio.emit('response', dict_error_msg, to=request.sid)
+    users.store_chat(username, receiver, message)
 
-        else:
-            users.store_chat(username,receiver,message)
-            dict_message = {0:message,1:username}
-           
-            #ENCRYPTION AES
-            socketio.emit('response',dict_message, to =users.retrieve_sid(receiver))      #sends back the message as a single string
+    if not users.check_status(receiver):
+        offline_msg = {
+            0: "error",
+            1: receiver,
+            2: f"{receiver} is not online"
+        }
+        socketio.emit('response', offline_msg, to=request.sid)
+        return
+
+    outgoing_msg = {
+        0: "encrypted",
+        1: username,
+        2: message
+    }
+    socketio.emit('response', outgoing_msg, to=users.retrieve_sid(receiver))
   
 
 @socketio.on('chat_log')
@@ -251,7 +253,6 @@ def send_log(data):
     sender = data.get('sender')
     receiver = data.get('receiver')
     logs = users.get_chat_log(sender,receiver)
-    print('giiiiii',logs)
     socketio.emit('send_log',logs,to=request.sid)
 
 @socketio.on('send_aes')
