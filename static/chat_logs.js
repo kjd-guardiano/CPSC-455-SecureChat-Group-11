@@ -41,7 +41,27 @@ socket.on('send_user_list', function (data) {
 });
 
 
+socket.on('online_check', function (data1) {
+    const nameEl = document.getElementById('receiver-name');
+    const statusEl = document.getElementById('receiver-status');
+    const containerEl = document.querySelector('.receiver-window1'); // <-- fixed
 
+    nameEl.textContent = data1['receiver'];
+
+    if (!data1['online']) {
+        statusEl.textContent = ' – Offline';
+        statusEl.style.fontSize = '0.9rem';
+        statusEl.style.color = '#ff5555';
+        containerEl.style.opacity = '0.3';
+        containerEl.style.boxShadow = 'none'; // remove shadow
+    } else {
+        statusEl.textContent = ' – Online';
+        statusEl.style.fontSize = '0.9rem';
+        statusEl.style.color = '#7CFC00';
+        containerEl.style.opacity = '1';
+        containerEl.style.boxShadow = '0 4px 10px rgba(121, 121, 121, 0.18)';
+    }
+});
 
 
 document.getElementById('receiver').addEventListener('change', function () {
@@ -51,14 +71,14 @@ document.getElementById('receiver').addEventListener('change', function () {
         send_receiver_shared_key[selectedReceiver]= deriveSharedAESKey(name,user_pass11,selectedReceiver)
     }
 
-
-
-
-    document.getElementById('receiver-window1').textContent = 'Chat with: ' + selectedReceiver
-    
-    socket.emit('is-online',{sender: name, receiver : selectedReceiver})
-
+    const nameEl = document.getElementById('receiver-name');
+    nameEl.textContent = selectedReceiver;
     global_receiver = selectedReceiver;
+    socket.emit('is-online', { sender: name, receiver: selectedReceiver });
+    
+   
+    
+
     if (!received_log.includes(selectedReceiver)){
         
         received_log.push(selectedReceiver)

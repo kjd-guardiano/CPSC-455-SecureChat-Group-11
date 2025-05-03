@@ -273,10 +273,12 @@ textarea {
 }
 
 .receiver-window1 {
-    font-size: 1.5rem; /* Or use 'xx-large', '24px', etc. */
+    background-color: #2b2c4c;
+    border-radius: 5px;
+    padding: 3px;
+    width: fit-content;
     font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: #9781ff; /* Discord blurple */
     font-weight: 600;
-   
+    font-size: larger;
+    box-shadow: 0 4px 10px rgba(121, 121, 121, 0.18);
 }
-

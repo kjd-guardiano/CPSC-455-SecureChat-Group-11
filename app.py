@@ -261,11 +261,17 @@ def receive_aes(data):
 
 @socketio.on('is-online')
 def is_online(data):
-    x = users.check_status(data.get('receiver'))
-    print('user is online', x)
+    receiver = data.get('receiver')
+    is_online = users.check_status(data.get('receiver'))
+    print('user is online', is_online)
+    
+    socketio.emit('online_check',{'online': is_online,'receiver': receiver},to=request.sid)
 
 @socketio.on('disconnect')
 def disconnect():
+    disconnecter = users.get_user(request.sid)
+    
+    socketio.emit('online_check',{'online': False,'receiver': disconnecter})
     users.disconnect(request.sid)
 
 # changed for new upload method, old version below kept for posterity
