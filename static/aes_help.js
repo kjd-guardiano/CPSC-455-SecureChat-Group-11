@@ -8,24 +8,36 @@ function send_aes_key() {
 }
 
 function encrypt_aes_string(plain_text, aes_encryption_key) {
+    const iv = CryptoJS.lib.WordArray.random(16);  // 128-bit IV
+
     const encrypted = CryptoJS.AES.encrypt(plain_text, aes_encryption_key, {
-        mode: CryptoJS.mode.ECB,
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7
     });
 
-    return encrypted.toString();  // ciphertext as base64
+    // Combine IV and ciphertext with a delimiter (e.g., ":")
+    return CryptoJS.enc.Base64.stringify(iv) + ':' + encrypted.toString();
 }
 
-
 function decrypt_aes_string(encrypted_string, aes_decryption_key) {
-    const bytes = CryptoJS.AES.decrypt(encrypted_string, aes_decryption_key, {
-        mode: CryptoJS.mode.ECB,
+    const parts = encrypted_string.split(':');
+    if (parts.length !== 2) {
+        console.error("Invalid encrypted format (expected iv:ciphertext)");
+        return null;
+    }
+
+    const iv = CryptoJS.enc.Base64.parse(parts[0]);
+    const ciphertext = parts[1];
+
+    const bytes = CryptoJS.AES.decrypt(ciphertext, aes_decryption_key, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7
     });
 
     return bytes.toString(CryptoJS.enc.Utf8);
 }
-
 
 function encrypt_aes_dict(msg_dict,aes_encryption_key) {
     for (let key in msg_dict) {
