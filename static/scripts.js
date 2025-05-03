@@ -9,21 +9,26 @@ socket.on('connect', function () {
 });
 
 socket.on('response', function (data) {
-    
-    const type = data[0]
-    var message = data[2];
-    const sender = data[1];
+    decrypted = decrypt_aes_dict(data,server_aes_key)
+    const type = decrypted[0]
+    var message = decrypted[2];
+    const sender = decrypted[1];
+
+    if (sender != global_receiver){
+        return
+    }
 
     if (type === "encrypted"){
         if (!(sender in send_receiver_shared_key)){
             send_receiver_shared_key[sender]= deriveSharedAESKey(name,user_pass11,sender)
         }
          message = decrypt_aes_string(message, send_receiver_shared_key[sender]);
-    }
-   
-    if (sender === global_receiver) {
         add_chat('receive', sender, message);
     }
+   else{
+        add_chat('receive', sender, message, 0, true);
+   
+}
 });
 
 //VT scan status return function
@@ -118,6 +123,8 @@ function sendMessage() {
         receiver: receiver
     };
    
+    dict_message = encrypt_aes_dict(dict_message,server_aes_key)
+    console.log(dict_message)
     //AES ENCRYPTION
     socket.emit('message', dict_message);  // Sends the dictionary with the message
 }
@@ -188,7 +195,7 @@ function uploadFile() {
             const encryptedBase64 = encryptedData.toString(CryptoJS.format.Base64);
 
             if (global_receiver) {
-                console.log(encryptedBase64)
+                
                 // Emit the encrypted file to the server (send only encrypted data, not the key)
                 socket.emit('upload_file', {
                     filename: file.name,

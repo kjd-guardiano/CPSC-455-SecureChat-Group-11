@@ -27,6 +27,61 @@ function decrypt_aes_string(encrypted_string, aes_decryption_key) {
 }
 
 
+function encrypt_aes_dict(msg_dict,aes_encryption_key) {
+    for (let key in msg_dict) {
+        if (msg_dict.hasOwnProperty(key)) {
+            const value = msg_dict[key];
+
+            // Encrypt the value using AES with the server's AES key
+            const encrypted_value = CryptoJS.AES.encrypt(value, aes_encryption_key, {
+                mode: CryptoJS.mode.ECB, 
+                padding: CryptoJS.pad.Pkcs7
+            }).toString();  // Convert the encrypted message to string
+
+            // Store the encrypted value back in the dictionary
+            msg_dict[key] = encrypted_value;
+        }
+    }
+    
+    return msg_dict;
+}
+
+
+
+function decrypt_aes_dict(msg_dict,aes_decryption_key){
+
+    for (let key in msg_dict) {
+        if (msg_dict.hasOwnProperty(key,aes_decryption_key)) {
+            const encrypted_value = msg_dict[key];
+
+            const bytes = CryptoJS.AES.decrypt(encrypted_value, aes_decryption_key, {
+                mode: CryptoJS.mode.ECB, 
+                padding: CryptoJS.pad.Pkcs7 
+            });
+
+        
+            const decrypted_value = bytes.toString(CryptoJS.enc.Utf8); 
+            msg_dict[key] = decrypted_value;
+        }
+    }
+    
+    return msg_dict;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function decryptData(encryptedFileB64) {
     // Decode the base64-encoded encrypted file using crypto-js
     const encryptedData = CryptoJS.enc.Base64.parse(encryptedFileB64);  // Decode from Base64

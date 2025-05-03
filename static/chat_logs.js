@@ -76,8 +76,6 @@ document.getElementById('receiver').addEventListener('change', function () {
 
    
 socket.on('send_log', function (data1) {
-    // Decrypt only the "2" field of each message
-    console.log(data1)
     data1.forEach(item => {
         item["2"] = decrypt_aes_string(item["2"], send_receiver_shared_key[global_receiver]);
     });
@@ -95,38 +93,46 @@ socket.on('send_log', function (data1) {
 
 
 
-function add_chat(type,receiver, message, position) {
+function add_chat(type, receiver, message, position, error = null) {
     var chatWindow = document.getElementById('chat-window-' + receiver);
     if (chatWindow) {
         var messageDisplay = chatWindow.querySelector('.message-display');
-        
-        // Create message container div
+
+        // Create message container
         var messageElement = document.createElement('text');
         messageElement.classList.add('message');
 
-        // Create message text element
+        // Create and set message text
         var messageText = document.createElement('text');
         messageText.classList.add('message-text');
-        messageText.innerHTML = formatText(message);
-
-        // Check if the message is sent by the user or received
-        if (type === 'send') {  // Sent message
-            messageElement.classList.add('sent-message');
-        } else {  // Received message
-            messageElement.classList.add('received-message');
+        
+        // Apply styles if error is set
+        if (error) {
+            
+            messageText.style.color = 'red';
+            messageText.style.fontSize = '0.8em';
         }
 
-        // Append message text to the message container
+        messageText.innerHTML = formatText(message);
         messageElement.appendChild(messageText);
 
-        // Insert the message at the top if position is 1
+        // Normal message styling
+        if (!error) {
+            if (type === 'send') {
+                messageElement.classList.add('sent-message');
+            } else {
+                messageElement.classList.add('received-message');
+            }
+        }
+
+        // Insert at top or bottom
         if (position === 1) {
             messageDisplay.insertAdjacentElement('afterbegin', messageElement);
         } else {
             messageDisplay.appendChild(messageElement);
         }
 
-        // Scroll the chat window to the bottom
+        // Scroll to bottom
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 }

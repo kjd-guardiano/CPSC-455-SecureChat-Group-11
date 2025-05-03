@@ -216,37 +216,35 @@ def authenticate(login_info):
 
 @socketio.on('message')
 def handle_message(data):
-    username = data.get('user')
-    receiver = data.get('receiver')
-    message = data.get('message')
+    decrypted = aes_helper.decrypt_aes(data,users.get_user(request.sid))
+    username = decrypted.get('user')
+    receiver = decrypted.get('receiver')
+    message = decrypted.get('message')
 
+    #message sent if ratelimits are applied
     if not users.check_limits(username, "msg"):
-        rate_limit_msg = {
-            0: "error",
-            1: receiver,
-            2: "Rate-limited! You need to slow down!"
-        }
-        socketio.emit('response', rate_limit_msg, to=request.sid)
+        rate_limit_msg = {0: "error",1: receiver,2: "Rate-limited! You need to slow down!"}
+        encrypted_rate_limit = aes_helper.encrypt_aes(rate_limit_msg,username)
+        socketio.emit('response', encrypted_rate_limit, to=request.sid)
         return
 
+    #stores chat if no ratelimits are applied
     users.store_chat(username, receiver, message)
 
+    #message sent if reciever is offline(still stores chat)
     if not users.check_status(receiver):
-        offline_msg = {
-            0: "error",
-            1: receiver,
-            2: f"{receiver} is not online"
-        }
-        socketio.emit('response', offline_msg, to=request.sid)
+        offline_msg = {0: "error",1: receiver,2: f"{receiver} is not online"}
+        encrypted_offline_msg = aes_helper.encrypt_aes(offline_msg,username)
+        socketio.emit('response', encrypted_offline_msg, to=request.sid)
         return
 
-    outgoing_msg = {
-        0: "encrypted",
-        1: username,
-        2: message
-    }
+    #message sent if reciever is online
+    outgoing_msg = {0: "encrypted",1: username,2: message}
+    encrypted_outgoing_msg = aes_helper.encrypt_aes(outgoing_msg,receiver)
     socketio.emit('response', outgoing_msg, to=users.retrieve_sid(receiver))
   
+
+
 
 @socketio.on('chat_log')
 def send_log(data):
