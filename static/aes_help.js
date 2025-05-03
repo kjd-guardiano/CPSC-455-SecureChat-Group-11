@@ -20,6 +20,7 @@ function encrypt_aes_string(plain_text, aes_encryption_key) {
     return CryptoJS.enc.Base64.stringify(iv) + ':' + encrypted.toString();
 }
 
+
 function decrypt_aes_string(encrypted_string, aes_decryption_key) {
     const parts = encrypted_string.split(':');
     if (parts.length !== 2) {
@@ -38,6 +39,8 @@ function decrypt_aes_string(encrypted_string, aes_decryption_key) {
 
     return bytes.toString(CryptoJS.enc.Utf8);
 }
+
+
 
 function encrypt_aes_dict(msg_dict,aes_encryption_key) {
     for (let key in msg_dict) {
@@ -79,13 +82,6 @@ function decrypt_aes_dict(msg_dict,aes_decryption_key){
     
     return msg_dict;
 }
-
-
-
-
-
-
-
 
 
 

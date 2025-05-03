@@ -241,7 +241,7 @@ def handle_message(data):
     #message sent if reciever is online
     outgoing_msg = {0: "encrypted",1: username,2: message}
     encrypted_outgoing_msg = aes_helper.encrypt_aes(outgoing_msg,receiver)
-    socketio.emit('response', outgoing_msg, to=users.retrieve_sid(receiver))
+    socketio.emit('response', encrypted_outgoing_msg, to=users.retrieve_sid(receiver))
   
 
 
@@ -274,7 +274,7 @@ if __name__ == '__main__':
 #    socketio.run(app, host='0.0.0.0', port=5000)
   cert = 'security/securechat.crt'
   key = 'security/seckey.key'
-  app.debug = True
+  
   # wrapping for ssl
   listener = eventlet.listen(('0.0.0.0', 5000))
   ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
