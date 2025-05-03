@@ -216,37 +216,34 @@ def authenticate(login_info):
 
 @socketio.on('message')
 def handle_message(data):
-    decrypt_dict = aes_helper.decrypt_aes(data,users.get_user(request.sid))
+    print('DHJSKBVSHJDVSKHGDJVSKHDGVSDKHGSDV',data)
     #DECRYPTION AES
-    username = decrypt_dict.get('user')
-    receiver = decrypt_dict.get('receiver')
+    username = data.get('user')
+    receiver = data.get('receiver')
     
     if not users.check_limits(username, "msg"):
          dict_rate_error = {0:"Rate-limited! You need to slow down!",1:receiver}
-         encrypted = aes_helper.encrypt_aes(dict_rate_error,username)
-         #ENCRYPTION AES
-         socketio.emit('response',encrypted , to=request.sid)
+      
+        
+         socketio.emit('response',dict_rate_error , to=request.sid)
     else:
 
-        message = decrypt_dict.get('message')    #sets message from dictionary
-        if not(message==''):
-            message1 = f"{username}: {message}" #formats message; changed for chat style conformity
-            print(message1)
+        message = data.get('message')    #sets message from dictionary
+      
             
         if not users.check_status(receiver):
             users.store_chat(username,receiver,message)
             error_msg = f"{receiver} is not online"
             dict_error_msg = {0:error_msg,1:receiver}
-            encrypted = aes_helper.encrypt_aes(dict_error_msg,username)
-            #ENCRYPTION AES
+           
             socketio.emit('response', dict_error_msg, to=request.sid)
 
         else:
             users.store_chat(username,receiver,message)
-            dict_message = {0:message1,1:username}
-            encrypted = aes_helper.encrypt_aes(dict_message,receiver)
+            dict_message = {0:message,1:username}
+           
             #ENCRYPTION AES
-            socketio.emit('response',encrypted , to =users.retrieve_sid(receiver))      #sends back the message as a single string
+            socketio.emit('response',dict_message, to =users.retrieve_sid(receiver))      #sends back the message as a single string
   
 
 @socketio.on('chat_log')
@@ -254,9 +251,7 @@ def send_log(data):
     sender = data.get('sender')
     receiver = data.get('receiver')
     logs = users.get_chat_log(sender,receiver)
-    for i in logs:
-        i=aes_helper.encrypt_aes(i,sender)
-    #ENCRYPTION AES
+    print('giiiiii',logs)
     socketio.emit('send_log',logs,to=request.sid)
 
 @socketio.on('send_aes')
@@ -280,7 +275,7 @@ if __name__ == '__main__':
 #    socketio.run(app, host='0.0.0.0', port=5000)
   cert = 'security/securechat.crt'
   key = 'security/seckey.key'
-
+  app.debug = True
   # wrapping for ssl
   listener = eventlet.listen(('0.0.0.0', 5000))
   ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)

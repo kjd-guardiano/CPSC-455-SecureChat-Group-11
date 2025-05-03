@@ -13,7 +13,6 @@ const db = firebase.firestore();
 
 
 
-
 async function storeEncryptedDHKey(name, password) {
   const enc = new TextEncoder();
 
@@ -45,7 +44,7 @@ async function storeEncryptedDHKey(name, password) {
     iv: Array.from(iv)
   });
 
-  console.log(`✅ Stored keys for ${name}`);
+  console.log(`Stored keys for ${name}`);
 }
 
 
@@ -131,14 +130,3 @@ async function deriveSharedAESKey(nameA, password, nameB) {
 //'jacob',1234
 //'johhn',1211134
 
-
-
-
-x = deriveSharedAESKey('billy', 123, 'jacob')
-y = deriveSharedAESKey('jacob', 1234, 'billy')
-  console.log(x)
-
-en = encrypt_aes({x:'hisasasasaiiii'})
-console.log(en)
-de = decrypt_aes(en)
-console.log(de)

@@ -1,4 +1,4 @@
-
+send_receiver_shared_key = {}
 received_log = [];
 global_receiver = ''
 
@@ -45,9 +45,15 @@ socket.on('send_user_list', function (data) {
 
 
 document.getElementById('receiver').addEventListener('change', function () {
-    
+     
     var selectedReceiver = this.value;
-    
+    if (!(selectedReceiver in send_receiver_shared_key)){
+        send_receiver_shared_key[selectedReceiver]= deriveSharedAESKey(name,user_pass11,selectedReceiver)
+    }
+
+
+
+
     document.getElementById('receiver-window1').textContent = 'Chat with: ' + selectedReceiver
     
     socket.emit('is-online',{sender: name, receiver : selectedReceiver})
@@ -70,24 +76,22 @@ document.getElementById('receiver').addEventListener('change', function () {
 
    
 socket.on('send_log', function (data1) {
-    for (let i in data1){
-        data1[i] = decrypt_aes(data1[i]);
-    }
-    
-    data1.reverse().forEach(item => {
-        if (item["0"] == name){
-            message = "you: " + item["2"]
-            add_chat('send', global_receiver, message,1)
-        }
-        else{
-            add_chat('receive',global_receiver,item["0"]+": "+item["2"],1)
-        }
-      
+    // Decrypt only the "2" field of each message
+    console.log(data1)
+    data1.forEach(item => {
+        item["2"] = decrypt_aes_string(item["2"], send_receiver_shared_key[global_receiver]);
     });
-   
+
+    // Display chat messages in reverse order
+    data1.reverse().forEach(item => {
+        if (item["0"] == name) {
+            const message = "you: " + item["2"];
+            add_chat('send', global_receiver, message, 1);
+        } else {
+            add_chat('receive', global_receiver, item["0"] + ": " + item["2"], 1);
+        }
+    });
 });
-
-
 
 
 

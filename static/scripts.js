@@ -1,5 +1,6 @@
 var socket = io.connect('wss://' + document.domain + ':' + location.port);
 
+var user_pass11 = ''
 var name = '';
 chatters = [];
 
@@ -8,12 +9,20 @@ socket.on('connect', function () {
 });
 
 socket.on('response', function (data) {
-    decrypted_dict = decrypt_aes(data)
-    console.log('Server says: ' + decrypted_dict[0]);
-    var receiver1 = decrypted_dict[1];
-    if (receiver1 == global_receiver) {
-    console.log(receiver1);
-    add_chat('receive',receiver1,decrypted_dict[0])
+    const encryptedMessage = data[0];
+    const sender = data[1];
+
+    if (!(sender in send_receiver_shared_key)){
+        send_receiver_shared_key[sender]= deriveSharedAESKey(name,user_pass11,sender)
+    }
+
+
+
+    // Decrypt only the message (data[0])
+    const decryptedMessage = decrypt_aes_string(encryptedMessage, send_receiver_shared_key[sender]);
+
+    if (sender === global_receiver) {
+        add_chat('receive', sender, decryptedMessage);
     }
 });
 
@@ -67,13 +76,22 @@ socket.on('login1', function (data) {
 
 socket.on('signup', function (data) {
     const el = document.getElementById('sign_up_text'); // Make sure this element exists
-
+    //todo
     // Remove old message if it's still there
     const oldMsg = document.getElementById('signup-msg');
     if (oldMsg) oldMsg.remove();
 
-    let color = data[0] === 1 ? 'lightgreen' : 'red';
-    let message = data[0] === 1 ? '- Signup successful' : '- Username taken';
+    let color;
+    let message;
+
+    if (data[0] === 1) {
+        storeEncryptedDHKey(name, user_pass11);
+        color = 'lightgreen';
+        message = '- Signup successful';
+    } else {
+        color = 'red';
+        message = '- Username taken';
+    }
 
     el.innerHTML += ` <span id="signup-msg" style="color:${color}; font-size:smaller;">${message}</span>`;
 
@@ -92,21 +110,27 @@ function sendMessage() {
     chat_window_msg = 'you: ' + message
    add_chat('send',receiver,chat_window_msg)
 
-    
+
     // Create message dictionary and emit it to the server
-    dict_message = { message: message, user: name, receiver: receiver };
-    encrypted_dict = encrypt_aes(dict_message)
+    dict_message = {
+        message: encrypt_aes_string(message, send_receiver_shared_key[global_receiver]),
+        user: name,
+        receiver: receiver
+    };
+   
     //AES ENCRYPTION
-    socket.emit('message', encrypted_dict);  // Sends the dictionary with the message
+    socket.emit('message', dict_message);  // Sends the dictionary with the message
 }
 
 
 
 function sign_up() {
-    generatePublicPart();
+
     event.preventDefault();
     var username = document.getElementById('Sign_up_username').value;
+    name = username;
     var password = document.getElementById('Sign_up_password').value;
+    user_pass11 = password;
     dict_userpass = { username: username, password: password }
     encrypted = encrypt_login(dict_userpass)
     socket.emit('sign_up', encrypted);
@@ -116,6 +140,7 @@ function login() {
     event.preventDefault();
     var username = document.getElementById('username').value;
     var password = document.getElementById('password').value;
+    user_pass11 = password;
     dict_userpass = { username: username, password: password }
     encrypted =encrypt_login(dict_userpass)
     socket.emit('authenticate',encrypted );

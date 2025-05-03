@@ -8,46 +8,23 @@ function send_aes_key() {
     socket.emit('send_aes',encrypted_key)
 }
 
+function encrypt_aes_string(plain_text, aes_encryption_key) {
+    const encrypted = CryptoJS.AES.encrypt(plain_text, aes_encryption_key, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
 
-function encrypt_aes(msg_dict) {
-    for (let key in msg_dict) {
-        if (msg_dict.hasOwnProperty(key)) {
-            const value = msg_dict[key];
-
-            // Encrypt the value using AES with the server's AES key
-            const encrypted_value = CryptoJS.AES.encrypt(value, myAESKeyWordArray, {
-                mode: CryptoJS.mode.ECB, 
-                padding: CryptoJS.pad.Pkcs7
-            }).toString();  // Convert the encrypted message to string
-
-            // Store the encrypted value back in the dictionary
-            msg_dict[key] = encrypted_value;
-        }
-    }
-    
-    return msg_dict;
+    return encrypted.toString();  // ciphertext as base64
 }
 
 
+function decrypt_aes_string(encrypted_string, aes_decryption_key) {
+    const bytes = CryptoJS.AES.decrypt(encrypted_string, aes_decryption_key, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
 
-function decrypt_aes(msg_dict){
-
-    for (let key in msg_dict) {
-        if (msg_dict.hasOwnProperty(key)) {
-            const encrypted_value = msg_dict[key];
-
-            const bytes = CryptoJS.AES.decrypt(encrypted_value, myAESKeyWordArray, {
-                mode: CryptoJS.mode.ECB, 
-                padding: CryptoJS.pad.Pkcs7 
-            });
-
-        
-            const decrypted_value = bytes.toString(CryptoJS.enc.Utf8); 
-            msg_dict[key] = decrypted_value;
-        }
-    }
-    
-    return msg_dict;
+    return bytes.toString(CryptoJS.enc.Utf8);
 }
 
 
