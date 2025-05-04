@@ -8,7 +8,11 @@ import os
 def sign_up(username_,password_):
     user = username_
     password = password_
-    password = password.encode(encoding='utf-8')
+
+    if isinstance(password, bytes):
+        password = password
+    else:
+        password = password.encode(encoding='utf-8')
 
     salt = bcrypt.gensalt()
 

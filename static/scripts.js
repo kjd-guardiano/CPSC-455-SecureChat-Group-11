@@ -1,4 +1,6 @@
 var socket = io.connect('wss://' + document.domain + ':' + location.port);
+
+var user_pass11 = ''
 var name = '';
 chatters = [];
 
@@ -7,17 +9,42 @@ socket.on('connect', function () {
 });
 
 socket.on('response', function (data) {
-    decrypted_dict = decrypt_aes(data)
-    console.log('Server says: ' + decrypted_dict[0]);
-    var receiver1 = decrypted_dict[1];
-    if (receiver1 == global_receiver) {
-    console.log(receiver1);
-    add_chat('receive',receiver1,decrypted_dict[0])
+    decrypted = decrypt_aes_dict(data,server_aes_key)
+    const type = decrypted[0]
+    var message = decrypted[2];
+    const sender = decrypted[1];
+
+    if (sender != global_receiver){
+        return
     }
+
+    if (type === "encrypted"){
+        if (!(sender in send_receiver_shared_key)){
+            send_receiver_shared_key[sender]= deriveSharedAESKey(name,user_pass11,sender)
+        }
+         message = decrypt_aes_string(message, send_receiver_shared_key[sender]);
+         message1 = sender + ": " + message
+        add_chat('receive', sender, message1);
+    }
+   else{
+        add_chat('receive', sender, message, 0, true);
+   
+}
 });
 
+//VT scan status return function
+socket.on('scan_status', (data) => {
+    if (data.status === 'unsafe') {
+        alert(`File flagged as unsafe: ${data.malicious} malicious reports found.`);
+    }
+    else if (data.status === 'too_large') {
+        alert(`This file is too large.`);
+    }
+    else if (data.status === 'scan_failed') {
+        alert(`Upload failed, please try again.`);
+    }
 
-
+});
 
 //recieves the success or failure of login attempt
 socket.on('login1', function (data) {
@@ -31,11 +58,54 @@ socket.on('login1', function (data) {
         document.getElementById('login_form').style.display = "none";
         document.getElementById('sign_up_form').style.display = "none";
         
-    } else if (data[0] === -1) {
+    }  else if (data[0] === -1) {
+        const el = document.getElementById('log_in_text');
+    
+        // Check if error message already exists
+        if (!document.getElementById('login-error')) {
+            const errorSpan = document.createElement('span');
+            errorSpan.id = 'login-error';
+            errorSpan.style.color = 'red';
+            errorSpan.style.fontSize = 'smaller';
+            errorSpan.textContent = ' - Login invalid';
+    
+            el.appendChild(errorSpan);
+    
+            setTimeout(() => {
+                errorSpan.remove();
+            }, 5000);
+        }
+    
         console.log("Login failed");
     }
 });
 
+socket.on('signup', function (data) {
+    const el = document.getElementById('sign_up_text'); // Make sure this element exists
+    //todo
+    // Remove old message if it's still there
+    const oldMsg = document.getElementById('signup-msg');
+    if (oldMsg) oldMsg.remove();
+
+    let color;
+    let message;
+
+    if (data[0] === 1) {
+        storeEncryptedDHKey(name, user_pass11);
+        color = 'lightgreen';
+        message = '- Signup successful';
+    } else {
+        color = 'red';
+        message = '- Username taken';
+    }
+
+    el.innerHTML += ` <span id="signup-msg" style="color:${color}; font-size:smaller;">${message}</span>`;
+
+    setTimeout(() => {
+        const msg = document.getElementById('signup-msg');
+        if (msg) msg.remove();
+    }, 5000);
+});
 
 function sendMessage() {
     var message = document.getElementById('message').value;
@@ -46,20 +116,30 @@ function sendMessage() {
     chat_window_msg = 'you: ' + message
    add_chat('send',receiver,chat_window_msg)
 
-    
+   
     // Create message dictionary and emit it to the server
-    dict_message = { message: message, user: name, receiver: receiver };
-    encrypted_dict = encrypt_aes(dict_message)
+    dict_message = {
+        
+        message: encrypt_aes_string(message, send_receiver_shared_key[global_receiver]),
+        user: name,
+        receiver: receiver
+    };
+   
+    dict_message = encrypt_aes_dict(dict_message,server_aes_key)
+    console.log(dict_message)
     //AES ENCRYPTION
-    socket.emit('message', encrypted_dict);  // Sends the dictionary with the message
+    socket.emit('message', dict_message);  // Sends the dictionary with the message
 }
 
 
 
 function sign_up() {
+
     event.preventDefault();
     var username = document.getElementById('Sign_up_username').value;
+    name = username;
     var password = document.getElementById('Sign_up_password').value;
+    user_pass11 = password;
     dict_userpass = { username: username, password: password }
     encrypted = encrypt_login(dict_userpass)
     socket.emit('sign_up', encrypted);
@@ -69,6 +149,7 @@ function login() {
     event.preventDefault();
     var username = document.getElementById('username').value;
     var password = document.getElementById('password').value;
+    user_pass11 = password;
     dict_userpass = { username: username, password: password }
     encrypted =encrypt_login(dict_userpass)
     socket.emit('authenticate',encrypted );
@@ -116,7 +197,7 @@ function uploadFile() {
             const encryptedBase64 = encryptedData.toString(CryptoJS.format.Base64);
 
             if (global_receiver) {
-                console.log(encryptedBase64)
+                
                 // Emit the encrypted file to the server (send only encrypted data, not the key)
                 socket.emit('upload_file', {
                     filename: file.name,
