@@ -8,6 +8,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
     <script src="https://cdn.rawgit.com/travist/jsencrypt/master/bin/jsencrypt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+
 
 
 </head>
@@ -16,20 +20,26 @@
     <h1>SecureChat</h1>
     <hr>
     <div id="loginContainer">
-        <h2 id="log_in_text"><span >Log In</span></h2>
+        <h2 id="log_in_text"><span>Log In</span></h2>
     </div>
-    <form id="login_form" onsubmit="login()">
-        <input type="text" id="username" placeholder="Username" required><br><br>
-        <input type="password" id="password" placeholder="Password" required><br><br>
+    <form id="login_form"
+        onsubmit="this.querySelector('button').disabled=true; setTimeout(() => this.querySelector('button').disabled=false, 2000); login(); return false;">
+        <input type="text" id="username" placeholder="Username" required pattern="^\S+$"
+            title="No spaces allowed"><br><br>
+        <input type="password" id="password" placeholder="Password" required pattern="^\S+$"
+            title="No spaces allowed"><br><br>
         <button class="formButton" type="submit">Login</button><br><br>
     </form>
 
     <div id="signupContainer">
-        <h2 id="sign_up_text"><span >No account? Sign up here!</span></h2>
+        <h2 id="sign_up_text"><span>No account? Sign up here!</span></h2>
     </div>
-    <form id="sign_up_form" onsubmit="sign_up()">
-        <input type="text" id="Sign_up_username" placeholder="Username" required><br><br>
-        <input type="password" id="Sign_up_password" placeholder="Password" required><br><br>
+    <form id="sign_up_form"
+        onsubmit="this.querySelector('button').disabled=true; setTimeout(() => this.querySelector('button').disabled=false, 2000); sign_up(); return false;">
+        <input type="text" id="Sign_up_username" placeholder="Username" required pattern="^\S+$"
+            title="No spaces allowed"><br><br>
+        <input type="password" id="Sign_up_password" placeholder="Password" required pattern="^\S+$"
+            title="No spaces allowed"><br><br>
         <button class="formButton" type="submit">Sign Up</button><br><br>
     </form>
 
@@ -50,56 +60,66 @@
             <select id="receiver">
             </select>
         </div>
-<div class ="spacer1"> 
-
-        <div id="receivedHeader" style="width: 70%;">
-            
-
-        </div>
-        <textarea type="text" placeholder="Type your message here! (max. 2000 characters)" maxlength="2000"
-            class="emoji-input" id="message" placeholder="Type a message" onkeyup="adjustHeight(this)"></textarea>
-        <div  class="emoji-container"></div>
         
-
-
-
-        <!-- Loads Emoji Picking Script [TODO: Clean up a little + add button!]-->
-        <script src="static/emojipicker.js"></script>
-        <!-- Wanted to add send functionality on enter key press -->
-        <script>
-            var input = document.getElementById("message");
-            input.addEventListener("keypress", function (event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    sendMessage();
-                }
-            });
-        </script>
-
-
-        <div class="file-upload">Upload a File <br> 
-            <input type="file" id="fileInput">
-            <br> <br>
-            <button onclick="uploadFile()">Upload</button>
-            <br> <br>
-            Download a File <br> 
-            <input type="text" id="filenameInput" placeholder="Enter filename to download">
-            <br> <br>
-            <button onclick="downloadFile()">Download</button>
-            <br> <br> 
-            Uploaded Files:
-            <ul id="fileList"></ul>
-
+        <div class="receiver-window1">
+            <span id="receiver-name"></span>
+            <span id="receiver-status"></span>
         </div>
 
+        <div class="spacer1">
+
+            <div id="receivedHeader" style="width: 70%;">
+
+
+            </div>
+            <textarea type="text" placeholder="Type your message here! (max. 2000 characters)" maxlength="2000"
+                class="emoji-input" id="message" placeholder="Type a message" onkeyup="adjustHeight(this)"></textarea>
+            <div class="emoji-container"></div>
+
+
+
+
+            <!-- Loads Emoji Picking Script [TODO: Clean up a little + add button!]-->
+            <script src="static/emojipicker.js"></script>
+            <!-- Wanted to add send functionality on enter key press -->
+            <script>
+                var input = document.getElementById("message");
+                input.addEventListener("keypress", function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        sendMessage();
+                        input.value = "";
+                        input.blur(); // <- add this if you want the placeholder to reappear visually
+                    }
+                });
+            </script>
+
+
+            <div class="file-upload">Upload a File <br>
+                <input type="file" id="fileInput">
+                <br> <br>
+                <button onclick="uploadFile()">Upload</button>
+                <br> <br>
+                Download a File <br>
+                <input type="text" id="filenameInput" placeholder="Enter filename to download">
+                <br> <br>
+                <button onclick="downloadFile()">Download</button>
+                <br> <br>
+                Uploaded Files:
+                <ul id="fileList"></ul>
+
+            </div>
+
+        </div>
     </div>
-</div>
-   
+
 
     <script src="static/scripts.js"></script>
     <script src="static/rsa_help.js"></script>
     <script src="static/chat_logs.js"></script>
     <script src="static/aes_help.js"></script>
+    <script src="static/dh_help.js"></script>
+
 </body>
 
 </html>

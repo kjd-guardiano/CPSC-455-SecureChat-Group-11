@@ -211,51 +211,47 @@ def authenticate(login_info):
                 users.set_status(username, request.sid)                      #using class now
                 dict_login_sucess = {0:login_sucess}
                 #TODO encrypt dict values
+                socketio.emit('online_check',{'online': True,'receiver': username})
     socketio.emit('login1',dict_login_sucess,to=request.sid)
 
 
 @socketio.on('message')
 def handle_message(data):
-    decrypt_dict = aes_helper.decrypt_aes(data,users.get_user(request.sid))
-    #DECRYPTION AES
-    username = decrypt_dict.get('user')
-    receiver = decrypt_dict.get('receiver')
-    
+    decrypted = aes_helper.decrypt_aes(data,users.get_user(request.sid))
+    username = decrypted.get('user')
+    receiver = decrypted.get('receiver')
+    message = decrypted.get('message')
+
+    #message sent if ratelimits are applied
     if not users.check_limits(username, "msg"):
-         dict_rate_error = {0:"Rate-limited! You need to slow down!",1:receiver}
-         encrypted = aes_helper.encrypt_aes(dict_rate_error,username)
-         #ENCRYPTION AES
-         socketio.emit('response',encrypted , to=request.sid)
-    else:
+        rate_limit_msg = {0: "error",1: receiver,2: "Rate-limited! You need to slow down!"}
+        encrypted_rate_limit = aes_helper.encrypt_aes(rate_limit_msg,username)
+        socketio.emit('response', encrypted_rate_limit, to=request.sid)
+        return
 
-        message = decrypt_dict.get('message')    #sets message from dictionary
-        if not(message==''):
-            message1 = f"{username}: {message}" #formats message; changed for chat style conformity
-            print(message1)
-            
-        if not users.check_status(receiver):
-            error_msg = f"{receiver} is not online"
-            dict_error_msg = {0:error_msg,1:receiver}
-            encrypted = aes_helper.encrypt_aes(dict_error_msg,username)
-            #ENCRYPTION AES
-            socketio.emit('response', dict_error_msg, to=request.sid)
+    #stores chat if no ratelimits are applied
+    users.store_chat(username, receiver, message)
 
-        else:
-            users.store_chat(username,receiver,message)
-            dict_message = {0:message1,1:username}
-            encrypted = aes_helper.encrypt_aes(dict_message,receiver)
-            #ENCRYPTION AES
-            socketio.emit('response',encrypted , to =users.retrieve_sid(receiver))      #sends back the message as a single string
+    #message sent if reciever is offline(still stores chat)
+    if not users.check_status(receiver):
+        offline_msg = {0: "error",1: receiver,2: f"{receiver} is not online"}
+        encrypted_offline_msg = aes_helper.encrypt_aes(offline_msg,username)
+        socketio.emit('response', encrypted_offline_msg, to=request.sid)
+        return
+
+    #message sent if reciever is online
+    outgoing_msg = {0: "encrypted",1: username,2: message}
+    encrypted_outgoing_msg = aes_helper.encrypt_aes(outgoing_msg,receiver)
+    socketio.emit('response', encrypted_outgoing_msg, to=users.retrieve_sid(receiver))
   
+
+
 
 @socketio.on('chat_log')
 def send_log(data):
     sender = data.get('sender')
     receiver = data.get('receiver')
     logs = users.get_chat_log(sender,receiver)
-    for i in logs:
-        i=aes_helper.encrypt_aes(i,sender)
-    #ENCRYPTION AES
     socketio.emit('send_log',logs,to=request.sid)
 
 @socketio.on('send_aes')
@@ -263,8 +259,20 @@ def receive_aes(data):
     key = rsa_helper.decrypt_aes(data)
     aes_helper.set_key(key,users.get_user(request.sid))
 
+
+@socketio.on('is-online')
+def is_online(data):
+    receiver = data.get('receiver')
+    is_online = users.check_status(data.get('receiver'))
+    print('user is online', is_online)
+    
+    socketio.emit('online_check',{'online': is_online,'receiver': receiver},to=request.sid)
+
 @socketio.on('disconnect')
 def disconnect():
+    disconnecter = users.get_user(request.sid)
+    
+    socketio.emit('online_check',{'online': False,'receiver': disconnecter})
     users.disconnect(request.sid)
 
 # changed for new upload method, old version below kept for posterity
@@ -273,7 +281,7 @@ if __name__ == '__main__':
 #    socketio.run(app, host='0.0.0.0', port=5000)
   cert = 'security/securechat.crt'
   key = 'security/seckey.key'
-
+  
   # wrapping for ssl
   listener = eventlet.listen(('0.0.0.0', 5000))
   ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)

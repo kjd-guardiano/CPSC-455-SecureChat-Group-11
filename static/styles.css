@@ -47,8 +47,8 @@ button {
 }
 
 button:hover {
-    background-color: #3498db;
-    border-color: #2980b9;
+    background-color: #7e41ef78;
+    border-color: #9d00ff;
 }
 
 .logoutButton {
@@ -68,9 +68,7 @@ button:hover {
     padding: 10px;
 }
 
-.logoutButton:hover:not(disabled) {
-    background: linear-gradient(92.83deg, #3498db 0%, #2980b9 100%);
-}
+
 
 .logoutButton:active:not(disabled) {
     background: #2980b9;
@@ -90,9 +88,7 @@ button:hover {
     transition: all 0.3s ease;
 }
 
-.formButton:hover:not(disabled) {
-    background: linear-gradient(92.83deg, #3498db 0%, #2980b9 100%);
-}
+
 
 .formButton:active:not(disabled) {
     background: #2980b9;
@@ -194,30 +190,38 @@ textarea {
     width: 90%;
 }
 
+
 .emoji-container {
     display: none;
     position: fixed;
-    top: 50%;
-    right: 0;
+    top: 65%;
+    right: 145px; 
     transform: translateY(-50%);
-    background-color: #333;
-    min-width: 160px;
-    border: 1px solid #444;
+    background-color: #4949d3ea;
+    border: 1px solid #000000;
     z-index: 1000;
     overflow: hidden;
     border-radius: 6px;
+    padding: 6px;
+    grid-template-columns: repeat(4, 1fr); /* 3 columns */
+    gap: 6px;
+
+    max-height: 400px; /* Limit height */
+    overflow-y: auto; /* Enable scroll if content is taller */
+    scrollbar-width: thin;        /* Firefox */
+    -ms-overflow-style: none;   
 }
 
+
+
 .emoji-container .emoji {
-    padding: 10px;
+    font-size: larger;
+    padding: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.emoji-container .emoji:hover {
-    background-color: #3435db;
-    color: white;
-}
+
 
 .message {
     display: flex;
@@ -266,4 +270,15 @@ textarea {
     background-color: #222227;
     padding: 10px;
     border-radius: 10px;
+}
+
+.receiver-window1 {
+    background-color: #2b2c4c;
+    border-radius: 5px;
+    padding: 3px;
+    width: fit-content;
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    font-size: larger;
+    box-shadow: 0 4px 10px rgba(121, 121, 121, 0.18);
 }
