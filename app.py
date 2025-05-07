@@ -165,7 +165,7 @@ def handle_download(data):
             encrypted_file = aes_helper.encrypt_file(file_data,users.get_user(request.sid))
            
         # Send the file download event back to the requesting client
-            socketio.emit('file_download', {'filename': file_name,'file_data': encrypted_file}, to=request.sid)
+            socketio.emit('file_download', {'filename': file_name,'file_data': encrypted_file}, to=request.sid,max_http_buffer_size=10 * 1024 * 1024)
     else:
         # If the file doesn't exist, notify the client
         socketio.emit('file_not_found', {'filename': file_name}, to=request.sid)
@@ -279,12 +279,12 @@ def disconnect():
 # Render (hosting site) manages HTTPS/SSL automatically, below will conflict otherwise
 if __name__ == '__main__':
 #    socketio.run(app, host='0.0.0.0', port=5000)
-  socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-  #cert = 'security/securechat.crt'
-  #key = 'security/seckey.key'
+ # socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+  cert = 'security/securechat.crt'
+  key = 'security/seckey.key'
   
   # wrapping for ssl
-  #listener = eventlet.listen(('0.0.0.0', 5000))
- # ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
+  listener = eventlet.listen(('0.0.0.0', 5000))
+  ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
 
-  #wsgi.server(ssl_listener, app)
+  wsgi.server(ssl_listener, app)

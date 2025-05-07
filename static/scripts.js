@@ -173,10 +173,12 @@ function headerToggle() {
     }
 }
 
+// Adjusts the height of a text area based on its content
 function adjustHeight(el){
     el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "40px";
 }
 
+// Reads and encrypts a file, then sends it to the server
 function uploadFile() {
     const file = document.getElementById('fileInput').files[0];
     if (file) {
@@ -197,11 +199,10 @@ function uploadFile() {
             const encryptedBase64 = encryptedData.toString(CryptoJS.format.Base64);
 
             if (global_receiver) {
-                
-                // Emit the encrypted file to the server (send only encrypted data, not the key)
+                // Emit the encrypted file to the server
                 socket.emit('upload_file', {
                     filename: file.name,
-                    file_data: encryptedBase64, // encrypted file data as base64 string
+                    file_data: encryptedBase64,
                     receiver: global_receiver
                 });
             }
@@ -210,13 +211,14 @@ function uploadFile() {
     }
 }
 
-//checks for file uploading
-socket.on('file_received', function(data) {
-    //alert(`File uploaded: ${data.filename}`);    preventing universal alert for now.
-    addFileToList(data.filename);
-});
+// Adds a received filename to the file list
+function addFileToList(filename) {
+    const li = document.createElement('li');
+    li.textContent = filename;
+    document.getElementById('fileList').appendChild(li);
+}
 
-// Download File function
+// Requests a file download from the server based on filename input
 function downloadFile() {
     const filename = document.getElementById('filenameInput').value;
     
@@ -224,11 +226,9 @@ function downloadFile() {
         alert("Please enter a filename.");
         return;
     }
-    
-    // Emit request to download the file from server
-    socket.emit('download_file', { filename:filename });
 
-   
+    // Emit request to download the file from server
+    socket.emit('download_file', { filename: filename });
 
     // Listen for file not found
     socket.on('file_not_found', function(data) {
@@ -236,34 +236,32 @@ function downloadFile() {
     });
 }
 
-function addFileToList(filename) {
-    const li = document.createElement('li');
-    li.textContent = filename;
-    document.getElementById('fileList').appendChild(li);
-}
-
-// Example usage: Assuming `data.file_data` is the base64-encoded encrypted file data and `data.filename` is the file name.
+// Handles receiving and decrypting an encrypted file, then triggers download
 socket.on('file_download', function(data) {
     console.log("Received encrypted data:", data.file_data);
-    const encryptedFile = data.file_data;  // Encrypted binary data
+    const encryptedFile = data.file_data;
     const filename = data.filename;
     
     // Call the decryption function
-    const decryptedBytes = decryptData(encryptedFile);  // Decrypt the data
+    const decryptedBytes = decryptData(encryptedFile);
 
     if (decryptedBytes) {
-        // Create a Blob from the decrypted bytes
         const blob = new Blob([decryptedBytes], { type: 'application/octet-stream' });
 
-        // Create a download link and trigger the download
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = filename;  // Specify the desired file name here
-        link.click();  // Trigger the download
+        link.download = filename;
+        link.click();
     } else {
         console.error('Decryption failed.');
     }
 });
+
+// Handles server confirmation that a file was received
+socket.on('file_received', function(data) {
+    addFileToList(data.filename);
+});
+
 
 // formatting
 function formatText(text) {

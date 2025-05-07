@@ -88,10 +88,6 @@ function decrypt_aes_dict(msg_dict,aes_decryption_key){
 
 
 
-
-
-
-
 function decryptData(encryptedFileB64) {
     // Decode the base64-encoded encrypted file using crypto-js
     const encryptedData = CryptoJS.enc.Base64.parse(encryptedFileB64);  // Decode from Base64
@@ -104,9 +100,9 @@ function decryptData(encryptedFileB64) {
         { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
     );
 
-    // Check if decryption was successful (decrypted data has byte length)
+   
     if (decryptedData.sigBytes > 0) {
-        // Convert the decrypted data into a byte array (Uint8Array)
+      
         const decryptedBytes = new Uint8Array(decryptedData.sigBytes);
         for (let i = 0; i < decryptedData.sigBytes; i++) {
             decryptedBytes[i] = decryptedData.words[i >>> 2] >>> (24 - (i % 4) * 8) & 0xff;
