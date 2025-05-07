@@ -120,7 +120,7 @@ socket.on('send_log', function (data1) {
 
 function sanitizeMessage(text) {
     // Remove dangerous characters and tags like <, >, ", ', &
-    return text.replace(/[<>/"'&]/g, '');
+    return text.replace(/[<>/'&]/g, '');
 }
 
 function add_chat(type, receiver, message, position, error = null) {

@@ -2,7 +2,6 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Random import get_random_bytes
 import base64
-import os
 
 class aes_help:
     def __init__(self):

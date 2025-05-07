@@ -1,11 +1,9 @@
 import eventlet
 eventlet.monkey_patch()
-from flask import Flask, render_template, request, send_from_directory, current_app
+from flask import Flask, render_template, request,  current_app
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
-from ftplib import FTP
 from flask_limiter.util import get_remote_address
-from contextlib import asynccontextmanager
 from ratelimits import *
 from security import rsa_crypto,aes_crypto
 from eventlet import wsgi
@@ -236,7 +234,8 @@ def handle_message(data):
     receiver = decrypted.get('receiver')
     message = decrypted.get('message')
 
-    
+    if not users.check_status(username):
+        return
 
     if not users.check_limits(username, "msg"):
         rate_limit_msg = {0: "error", 1: receiver, 2: "Rate-limited! You need to slow down!"}
@@ -291,12 +290,12 @@ def disconnect():
 # Render (hosting site) manages HTTPS/SSL automatically, below will conflict otherwise
 if __name__ == '__main__':
 #    socketio.run(app, host='0.0.0.0', port=5000)
- # socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-  cert = 'security/securechat.crt'
-  key = 'security/seckey.key'
+  socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+  #cert = 'security/securechat.crt'
+ # key = 'security/seckey.key'
   
   # wrapping for ssl
-  listener = eventlet.listen(('0.0.0.0', 5000))
-  ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
+  #listener = eventlet.listen(('0.0.0.0', 5000))
+  #ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
 
-  wsgi.server(ssl_listener, app)
+ # wsgi.server(ssl_listener, app)
