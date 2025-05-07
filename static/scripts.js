@@ -113,6 +113,9 @@ function sendMessage() {
     if (!message){
         return
     }
+    if (message.trim().length === 0){
+        return
+    }
     chat_window_msg = 'you: ' + message
    add_chat('send',receiver,chat_window_msg)
 

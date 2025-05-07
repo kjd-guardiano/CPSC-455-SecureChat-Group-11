@@ -247,7 +247,7 @@ def handle_message(data):
     users.store_chat(username, receiver, message)
 
     if not users.check_status(receiver):
-        offline_msg = {0: "error", 1: receiver, 2: f"{receiver} is not online"}
+        offline_msg = {0: "error", 1: receiver, 2: f"{receiver} is not online (Chat Saved)"}
         encrypted_offline_msg = aes_helper.encrypt_aes(offline_msg, username)
         socketio.emit('response', encrypted_offline_msg, to=request.sid)
         return
