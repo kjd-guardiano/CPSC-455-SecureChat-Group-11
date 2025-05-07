@@ -118,6 +118,11 @@ socket.on('send_log', function (data1) {
 
 
 
+function sanitizeMessage(text) {
+    // Remove dangerous characters and tags like <, >, ", ', &
+    return text.replace(/[<>/"'&]/g, '');
+}
+
 function add_chat(type, receiver, message, position, error = null) {
     var chatWindow = document.getElementById('chat-window-' + receiver);
     if (chatWindow) {
@@ -133,12 +138,14 @@ function add_chat(type, receiver, message, position, error = null) {
         
         // Apply styles if error is set
         if (error) {
-            
             messageText.style.color = 'red';
             messageText.style.fontSize = '0.8em';
         }
 
-        messageText.innerHTML = formatText(message);
+        // Sanitize before applying formatting
+        const safeMessage = sanitizeMessage(message);
+        messageText.innerHTML = formatText(safeMessage);
+
         messageElement.appendChild(messageText);
 
         // Normal message styling
