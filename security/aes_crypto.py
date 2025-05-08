@@ -2,7 +2,6 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Random import get_random_bytes
 import base64
-import os
 
 class aes_help:
     def __init__(self):
@@ -71,3 +70,8 @@ class aes_help:
         decrypted_data = unpad(cipher.decrypt(encrypted_data_bytes), AES.block_size)
         
         return decrypted_data
+    
+
+
+
+    

@@ -1,16 +1,22 @@
 import eventlet
 eventlet.monkey_patch()
-from flask import Flask, render_template, request, send_from_directory, current_app
+from flask import Flask, render_template, request,  current_app
 from flask_socketio import SocketIO
 from flask_limiter import Limiter
-from ftplib import FTP
 from flask_limiter.util import get_remote_address
-from contextlib import asynccontextmanager
 from ratelimits import *
 from security import rsa_crypto,aes_crypto
 from eventlet import wsgi
 from dotenv import load_dotenv
 import asyncio, math, time, authentication, clients, os, hashlib, requests, eventlet.wsgi, ssl
+import re
+
+
+def contains_dangerous_tags(text):
+    # Checks for any potentially dangerous characters or HTML tags
+    return bool(re.search(r'[<>/"\'&]', text))
+
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
@@ -127,6 +133,7 @@ def handle_upload(data):
         socketio.emit('file_error', {'message': 'File upload failed'}, to=request.sid)
 
 
+
 #event for file downloading
 @socketio.on('download_file')
 def handle_download(data):
@@ -165,7 +172,7 @@ def handle_download(data):
             encrypted_file = aes_helper.encrypt_file(file_data,users.get_user(request.sid))
            
         # Send the file download event back to the requesting client
-            socketio.emit('file_download', {'filename': file_name,'file_data': encrypted_file}, to=request.sid)
+            socketio.emit('file_download', {'filename': file_name,'file_data': encrypted_file}, to=request.sid,max_http_buffer_size=10 * 1024 * 1024)
     else:
         # If the file doesn't exist, notify the client
         socketio.emit('file_not_found', {'filename': file_name}, to=request.sid)
@@ -178,70 +185,74 @@ def handle_connect():
     socketio.emit('public_key',server_pubkey,to=request.sid)
 
 @socketio.on('sign_up')
-def authenticate(login_info):
+def sign_up(login_info):
     decrypted_dict = rsa_helper.decrypt_login(login_info)
     username = decrypted_dict['username']
     password = decrypted_dict['password']
+
+    # Reject if any dangerous tag is found
+    if contains_dangerous_tags(username) or contains_dangerous_tags(password):
+        print('dangerous tag detected')
+        return
+
     dict_sign_up_success = {0: -1}
-    if authentication.sign_up(username,password):
+    if authentication.sign_up(username, password):
         dict_sign_up_success[0] = 1
-        print(username,' successfully signed up!')
+        print(username, ' successfully signed up!')
         users.add_user(username)
-        
-        #TODO encrypt dict values
-    socketio.emit('signup',dict_sign_up_success,to=request.sid)
+    socketio.emit('signup', dict_sign_up_success, to=request.sid)
 
-
-#authenticates the user given username/password
+#
 @socketio.on('authenticate')
 def authenticate(login_info):
     decrypted_dict = rsa_helper.decrypt_login(login_info)
     username = decrypted_dict['username']
     password = decrypted_dict['password']
-    if username:
-        dict_login_sucess = {0:-1}
-        if users.check_limits(username, "login"):
-            #calls the actual fucntion that authenticates 
-            if authentication.pword_check(username,password):
-                login_sucess = 1
-                print(username,' successfully logged in!')
-                user_names = users.retrieve_user_dict()   
-                #TODO encrypt dict values                    
-                socketio.emit('send_user_list', user_names)
-                users.set_status(username, request.sid)                      #using class now
-                dict_login_sucess = {0:login_sucess}
-                #TODO encrypt dict values
-                socketio.emit('online_check',{'online': True,'receiver': username})
-    socketio.emit('login1',dict_login_sucess,to=request.sid)
 
+    # Reject if any dangerous tag is found
+    if contains_dangerous_tags(username) or contains_dangerous_tags(password):
+        print('dangerous tag detected')
+        return
+
+    if username:
+        dict_login_sucess = {0: -1}
+        if users.check_limits(username, "login"):
+            if authentication.pword_check(username, password):
+                login_sucess = 1
+                print(username, ' successfully logged in!')
+                user_names = users.retrieve_user_dict()
+                socketio.emit('send_user_list', user_names)
+                users.set_status(username, request.sid)
+                dict_login_sucess = {0: login_sucess}
+                socketio.emit('online_check', {'online': True, 'receiver': username})
+        socketio.emit('login1', dict_login_sucess, to=request.sid)
 
 @socketio.on('message')
 def handle_message(data):
-    decrypted = aes_helper.decrypt_aes(data,users.get_user(request.sid))
+    decrypted = aes_helper.decrypt_aes(data, users.get_user(request.sid))
     username = decrypted.get('user')
     receiver = decrypted.get('receiver')
     message = decrypted.get('message')
 
-    #message sent if ratelimits are applied
+    if not users.check_status(username):
+        return
+
     if not users.check_limits(username, "msg"):
-        rate_limit_msg = {0: "error",1: receiver,2: "Rate-limited! You need to slow down!"}
-        encrypted_rate_limit = aes_helper.encrypt_aes(rate_limit_msg,username)
+        rate_limit_msg = {0: "error", 1: receiver, 2: "Rate-limited! You need to slow down!"}
+        encrypted_rate_limit = aes_helper.encrypt_aes(rate_limit_msg, username)
         socketio.emit('response', encrypted_rate_limit, to=request.sid)
         return
 
-    #stores chat if no ratelimits are applied
     users.store_chat(username, receiver, message)
 
-    #message sent if reciever is offline(still stores chat)
     if not users.check_status(receiver):
-        offline_msg = {0: "error",1: receiver,2: f"{receiver} is not online"}
-        encrypted_offline_msg = aes_helper.encrypt_aes(offline_msg,username)
+        offline_msg = {0: "error", 1: receiver, 2: f"{receiver} is not online (Chat Saved)"}
+        encrypted_offline_msg = aes_helper.encrypt_aes(offline_msg, username)
         socketio.emit('response', encrypted_offline_msg, to=request.sid)
         return
 
-    #message sent if reciever is online
-    outgoing_msg = {0: "encrypted",1: username,2: message}
-    encrypted_outgoing_msg = aes_helper.encrypt_aes(outgoing_msg,receiver)
+    outgoing_msg = {0: "encrypted", 1: username, 2: message}
+    encrypted_outgoing_msg = aes_helper.encrypt_aes(outgoing_msg, receiver)
     socketio.emit('response', encrypted_outgoing_msg, to=users.retrieve_sid(receiver))
   
 
@@ -277,7 +288,12 @@ def disconnect():
 
 # changed for new upload method, old version below kept for posterity
 if __name__ == '__main__':
-#    socketio.run(app, host='0.0.0.0', port=5000)
+
+# FOR RENDER
+  #socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
+
+# FOR local/SSL
   cert = 'security/securechat.crt'
   key = 'security/seckey.key'
   
