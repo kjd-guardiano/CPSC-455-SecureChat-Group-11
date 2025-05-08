@@ -11,12 +11,11 @@ from dotenv import load_dotenv
 import asyncio, math, time, authentication, clients, os, hashlib, requests, eventlet.wsgi, ssl
 import re
 
+load_dotenv()
 
 def contains_dangerous_tags(text):
     # Checks for any potentially dangerous characters or HTML tags
     return bool(re.search(r'[<>/"\'&]', text))
-
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dummy_secret_key'
@@ -27,7 +26,6 @@ access_limiter = Limiter(get_remote_address,
                          default_limits=['10 per minute'],
                          storage_uri="memory://")
 
-load_dotenv()
 
 #set-up for VirusTotal API
 app.config['VT_API_KEY'] = os.getenv("VT_API_KEY")
@@ -39,8 +37,8 @@ upload_folder = './SecureChat_Upload'
 if not os.path.exists(upload_folder):
     os.makedirs(upload_folder)
 
-#socket setup
-socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True ,async_mode='eventlet')
+#socket setup, loggers are for server only
+socketio = SocketIO(app, ping_interval=20, ping_timeout=60, logger=True, engineio_logger=True ,async_mode='eventlet', max_http_buffer_size=10 * 1024 * 1024)
 
 users = clients.clients()   #class that stores info on all clients
 rsa_helper = rsa_crypto.rsa_help()
@@ -73,13 +71,14 @@ def virus_scan(file_bytes):
         stats = vt_data["data"]["attributes"]["last_analysis_stats"]
         mal = stats.get("malicious", 0)
         sus = stats.get("suspicious", 0)
-        return mal, sus
+        return mal, sus, None
 
     # continues if hash is unsuccessful, moves onto scanning
     response = requests.post("https://www.virustotal.com/api/v3/files", files=file, headers=headers)
 
     if response.status_code != 200:
-        return None, None, "Failed to upload."
+        print("API Key: ", current_app.config.get('VT_API_KEY'))
+        return None, None, f"Failed. Error {response.status_code}"
     
     # start of polling for report return
     analysis_id = response.json()["data"]["id"]
@@ -146,9 +145,9 @@ def handle_download(data):
             file_data = f.read() 
 
             # checking file hash for possible suspicious activity
-            mal, sus = virus_scan(file_data)
-            # if not prev found on VT (mal and sus return None)
-            if mal is None and sus is None:
+            mal, sus, error = virus_scan(file_data)
+            # if not prev found on VT (error is not None)
+            if error:
                 mal, sus, error = virus_scan(file_data)
                 if error:
                     socketio.emit('scan_status', {
@@ -172,7 +171,7 @@ def handle_download(data):
             encrypted_file = aes_helper.encrypt_file(file_data,users.get_user(request.sid))
            
         # Send the file download event back to the requesting client
-            socketio.emit('file_download', {'filename': file_name,'file_data': encrypted_file}, to=request.sid,max_http_buffer_size=10 * 1024 * 1024)
+            socketio.emit('file_download', {'filename': file_name,'file_data': encrypted_file}, to=request.sid)
     else:
         # If the file doesn't exist, notify the client
         socketio.emit('file_not_found', {'filename': file_name}, to=request.sid)
@@ -286,19 +285,7 @@ def disconnect():
     socketio.emit('online_check',{'online': False,'receiver': disconnecter})
     users.disconnect(request.sid)
 
-# changed for new upload method, old version below kept for posterity
 if __name__ == '__main__':
 
 # FOR RENDER
-  #socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
-
-# FOR local/SSL
-  cert = 'security/securechat.crt'
-  key = 'security/seckey.key'
-  
-  # wrapping for ssl
-  listener = eventlet.listen(('0.0.0.0', 5000))
-  ssl_listener = eventlet.wrap_ssl(listener, certfile = cert, keyfile = key, server_side=True)
-
-  wsgi.server(ssl_listener, app)
+  socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
