@@ -17,7 +17,12 @@ For <ins>underlined text</ins>, surround the text in underscores (_). Example: \
 Users can now add emojis to their messages from a pre-determined list located on the right of the browser window.
 
 ### Secure Connection
-All connections occur via WebSocket Secure over HTTPS.
+All connections occur via WebSocket Secure over HTTPS, with certificates for the website handled via Render.
+
+### Secure Messaging with AES & Encrypted Key Storage
+Each user is assigned a Diffie-Hellman key pair. The private key is encrypted using an AES key derived from the user’s password, plus a random salt and IV. The encrypted private key, public key, salt, and IV are all stored in Firebase.
+
+On login, the private key is decrypted client-side. For messaging, a shared secret is generated using Diffie-Hellman, and messages are encrypted with AES using that secret. Firebase rules prevent deletion or modification of stored keys, ensuring data integrity.
 
 ### User Authentication
 Basic authentication occurs via a username and password. Passwords are not stored directly on the server. In order to create an account, enter a username and password to the Sign Up form at the bottom of the landing page and click the sign-up button. From there, you can use the same login combination to log in. Protections for authentication also exist, such as brute force protection, end-to-end encryption, and chat logs that can be reviewed. Passwords are also stored through hashing + salting, for security.
@@ -26,7 +31,7 @@ Basic authentication occurs via a username and password. Passwords are not store
 Rate-limiting occurs both for initial connections (accessing the server) and messaging. Messages are not sent to their target destination when rate-limiting is enabled, shown as a message directly to the rate-limited user in the relevant chat.
 
 ### Connection Handling
-Joining and disconnecting are handled via the opening/closing of the web browser used to access the application. To ensure reconnection on interruption, refresh the page on the web browser of choice.
+Joining and disconnecting are handled via the opening/closing of the web browser used to access the application, as well as the log-out button in the top-right of the application when logged in as a user. To ensure reconnection on interruption, refresh the page on the web browser of choice.
 
 ##  Usage
 To access this application, go to [https://cpsc-455-securechat-group-11.onrender.com/](https://cpsc-455-securechat-group-11.onrender.com/). This will bring you to a log-in screen, where you can then sign-up using a username/password of choice. Afterwards, the user can log in via the same combination and chat with any existing users on the site, provided they are online.
